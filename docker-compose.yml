@@ -1,0 +1,47 @@
+services:
+  gamer-challenges-db:
+    image: postgres:latest
+    container_name: gamer-challenges-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: ${PG_DATABASE}
+    volumes:
+      - ./data:/docker-entrypoint-initdb.d
+      - ./pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER} -d ${PG_DATABASE}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  gamer-challenges-api:
+    image: node:22-alpine
+    container_name: gamer-challenges-api
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "${PORT}:3000"
+    environment:
+      - NODE_ENV=development
+      - PGHOST=gamer-challenges-db
+      - PGPORT=5432
+      - PGUSER=${PG_USER}
+      - PGPASSWORD=${PG_PASSWORD}
+      - TOMORROW_API_KEY=${TOMORROW_API_KEY}
+    depends_on:
+      gamer-challenges-db:
+        condition: service_healthy
+    command: ["npm", "run", "dev"]
+    restart: unless-stopped
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      gamer-challenges-db:
+        condition: service_healthy
