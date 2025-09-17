@@ -15,6 +15,7 @@ export const registerSchema = z.object({
         .string()
         .min(8, "Le mot de passe doit avoir au moins 12 caractères")
         .max(100, "Le mot de passe doit avoir au plus 100 caractères"), // We could add mandatory mix of lowecase and uppercase
+    confirm: z.string(),
     avatar: z.string().refine(
         (val) => {
             try {

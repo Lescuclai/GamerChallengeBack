@@ -17,7 +17,7 @@ export default class BaseController<T> {
     }
 
     async create(data: any): Promise<T> {
-        return this.model.create({ data });
+        return this.model.create({ data: data });
     }
 
     async update(id: number, data: any): Promise<T> {
