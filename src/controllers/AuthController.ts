@@ -2,8 +2,16 @@ import BaseController from "./BaseController.js";
 import type { Request, Response } from "express";
 import { prisma } from "../../prisma/index.js";
 import { registerSchema, loginSchema } from "../schemas/auth.schema.js";
+import { generateAuthenticationTokens } from "../utils/tokens.js";
+import { config } from "../../config.js";
 import jwt from "jsonwebtoken";
 import argon2 from "argon2";
+
+interface Token {
+    token: string;
+    type: string;
+    expiresInMS: number;
+}
 
 export default class AuthController extends BaseController<any> {
     constructor() {
@@ -23,22 +31,14 @@ export default class AuthController extends BaseController<any> {
             throw new Error("Email and password do not match");
         }
 
-        // Token (A voir si on met en place les access/refresh token)
-        const JWT_SECRET = process.env.JWT_SECRET;
-        if (!JWT_SECRET) {
-            throw new Error("JWT SECRET KEY is not defined in .env");
-        }
+        // Token (A voir si on met en place les refresh token)
 
-        const token = jwt.sign({ id: user.user_id }, JWT_SECRET, {
-            expiresIn: "1h",
-        });
+        const accessToken = generateAuthenticationTokens(user);
+        setAccessTokenCookie(res, accessToken);
 
         return res.json({
             message: "Connecté",
-            token,
-            profile: {
-                id: user.user_id,
-            },
+            accessToken,
         });
     }
 
@@ -79,4 +79,12 @@ export default class AuthController extends BaseController<any> {
             updated_at: user.updated_at,
         });
     }
+}
+
+function setAccessTokenCookie(res: Response, accessToken: Token) {
+    res.cookie("accessToken", accessToken.token, {
+        httpOnly: true,
+        maxAge: accessToken.expiresInMS,
+        secure: config.server.secure,
+    });
 }
