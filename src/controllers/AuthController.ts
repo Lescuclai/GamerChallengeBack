@@ -2,11 +2,44 @@ import BaseController from "./BaseController.js";
 import type { Request, Response, NextFunction } from "express";
 import { prisma } from "../../prisma/index.js";
 import { registerSchema, loginSchema } from "../schemas/auth.schema.js";
+import jwt from "jsonwebtoken";
 import argon2 from "argon2";
 
 export default class AuthController extends BaseController<any> {
     constructor() {
         super(prisma.user);
+    }
+
+    async login(req: Request, res: Response) {
+        const { email, password } = await loginSchema.parseAsync(req.body);
+
+        const user = await prisma.user.findFirst({ where: { email } });
+        if (!user) {
+            throw new Error("Email and password do not match");
+        }
+
+        const isMatching = await argon2.verify(user.password, password);
+        if (!isMatching) {
+            throw new Error("Email and password do not match");
+        }
+
+        // Token (A voir si on met en place les access/refresh token)
+        const JWT_SECRET = process.env.JWT_SECRET;
+        if (!JWT_SECRET) {
+            throw new Error("JWT SECRET KEY is not defined in .env");
+        }
+
+        const token = jwt.sign({ id: user.user_id }, JWT_SECRET, {
+            expiresIn: "1h",
+        });
+
+        return res.json({
+            message: "Connecté",
+            token,
+            profile: {
+                id: user.user_id,
+            },
+        });
     }
 
     async register(req: Request, res: Response) {
