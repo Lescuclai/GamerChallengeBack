@@ -3,7 +3,7 @@ CREATE TYPE "public"."Role" AS ENUM ('member', 'admin');
 
 -- CreateTable
 CREATE TABLE "public"."user" (
-    "id" SERIAL NOT NULL,
+    "user_id" SERIAL NOT NULL,
     "pseudo" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE "public"."user" (
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "deleted_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "user_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "user_pkey" PRIMARY KEY ("user_id")
 );
 
 -- CreateIndex
