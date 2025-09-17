@@ -9,11 +9,12 @@
         "lint:fix": "eslint . --fix",
         "format": "prettier . --write",
         "docker:up": "docker compose up -d --build",
-        "docker:start:dev": "npm run db:generate && npm run dev",
-        "db:generate": "prisma generate",
-        "db:migrate:dev": "docker compose exec gamer-challenges-api npx prisma migrate dev --name migrations",
+        "docker:start:dev": "npm run prisma:generate && npm run dev",
+        "prisma:generate": "prisma generate",
         "db:migrate:reset": "docker compose exec gamer-challenges-api npx prisma migrate reset --force",
-        "db:reinit": "docker compose exec gamer-challenges-api npx prisma migrate reset --force && docker compose exec gamer-challenges-api npx prisma migrate dev --name init && docker compose exec gamer-challenges-api npx prisma generate"
+        "db:migrate:dev": "docker compose exec gamer-challenges-api npx prisma migrate dev --name init",
+        "db:generate": "docker compose exec gamer-challenges-api npx prisma generate",
+        "db:reinit": "npm run db:migrate:reset && npm run db:migrate:dev && npm run db:generate"
     },
     "devDependencies": {
         "@eslint/js": "^9.31.0",
