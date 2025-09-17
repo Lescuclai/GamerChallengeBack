@@ -1,0 +1,31 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  member
+  admin
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  pseudo String
+  email  String @unique()
+  password  String
+  role      Role   @default(member)
+
+  // If we want refresh token for later
+  // refresh_tokens RefreshToken[] 
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  deleted_at DateTime @default(now())
+
+  @@map("user")
+}

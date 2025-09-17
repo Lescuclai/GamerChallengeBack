@@ -27,13 +27,13 @@ services:
         environment:
             - NODE_ENV=development
             - PGHOST=gamer-challenges-db
-            - PGPORT=5432
+            - PGPORT=${PG_PORT}
             - PGUSER=${PG_USER}
             - PGPASSWORD=${PG_PASSWORD}
         depends_on:
             gamer-challenges-db:
                 condition: service_healthy
-        command: ["npm", "run", "dev"]
+        command: ["npm", "run", "docker:start:dev"]
         restart: unless-stopped
     adminer:
         image: adminer:latest
