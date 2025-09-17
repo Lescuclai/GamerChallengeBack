@@ -11,6 +11,7 @@
         "docker:up": "docker compose up -d --build",
         "docker:start:dev": "npm run prisma:generate && npm run dev",
         "prisma:generate": "prisma generate",
+        "db:seed": "docker compose exec gamer-challenges-api npx tsx --env-file=.env prisma/seeding.ts",
         "db:migrate:reset": "docker compose exec gamer-challenges-api npx prisma migrate reset --force",
         "db:migrate:dev": "docker compose exec gamer-challenges-api npx prisma migrate dev --name init",
         "db:generate": "docker compose exec gamer-challenges-api npx prisma generate",
@@ -32,6 +33,7 @@
     "dependencies": {
         "@prisma/client": "^6.16.2",
         "@types/cors": "^2.8.19",
+        "argon2": "^0.44.0",
         "axios": "^1.10.0",
         "cors": "^2.8.5",
         "express": "^5.1.0",
