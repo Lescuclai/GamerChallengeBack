@@ -7,7 +7,7 @@ type UserType = NonNullable<Awaited<ReturnType<typeof prisma.user.findUnique>>>;
 
 export function generateAuthenticationTokens(user: UserType) {
     const payload = {
-        userId: user.user_id,
+        id: user.user_id,
         role: user.role,
     };
 
@@ -25,4 +25,13 @@ export function generateAuthenticationTokens(user: UserType) {
         type: "Bearer",
         expiresInMS: 1 * 60 * 60 * 1000, // 1h
     };
+}
+
+export function getJwtSecret() {
+    const JWT_SECRET = config.server.jwtSecret;
+    if (!JWT_SECRET) {
+        throw new Error("JWT SECRET KEY is not defined in .env");
+    }
+
+    return JWT_SECRET;
 }

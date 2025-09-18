@@ -1,14 +1,17 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import type { Request, Response, NextFunction, RequestHandler } from "express";
+import { Role } from "@prisma/client";
+import type { Request, Response, NextFunction } from "express";
+import { getJwtSecret } from "../utils/tokens.js";
 
 dotenv.config();
 
-interface JwtPayload {
+export interface JwtPayload {
     id: number;
+    role: Role;
 }
 
-interface JwtRequest extends Request {
+export interface JwtRequest extends Request {
     user?: JwtPayload;
 }
 
@@ -17,28 +20,41 @@ export const verifyToken = (
     res: Response,
     next: NextFunction
 ) => {
-    const authHeader = req.headers["authorization"];
+    const accessToken = req.cookies?.accessToken;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        return res.status(401).json({ error: "Token missing or invalid" });
-    }
-
-    const token = authHeader.substring(7);
-
-    if (!token) {
-        return res.status(401).json({ error: "Token missing" });
+    if (!accessToken || accessToken.trim() === "") {
+        return res.status(401).json({ message: "Utilisateur non authentifié" });
     }
 
     try {
-        const JWT_SECRET = process.env.JWT_SECRET;
-        if (!JWT_SECRET) {
-            throw new Error("JWT SECRET KEY is not defined in .env");
+        const decoded = jwt.verify(accessToken, getJwtSecret()) as JwtPayload;
+
+        if (!decoded || !decoded.id) {
+            return res
+                .status(401)
+                .json({ message: "Utilisateur non authentifié" });
         }
 
-        const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
         req.user = decoded;
+
         next();
-    } catch (err) {
-        return res.status(403).json({ error: "Token invalid or expired" });
+    } catch {
+        return res.status(401).json({ message: "Token invalide ou expiré" });
     }
 };
+
+export function verifyRoles(roles: Role[]) {
+    return (req: JwtRequest, res: Response, next: NextFunction) => {
+        if (!req.user) {
+            return res
+                .status(401)
+                .json({ message: "Utilisateur non authentifié" });
+        }
+
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({ message: "Accès refusé" });
+        }
+
+        next();
+    };
+}

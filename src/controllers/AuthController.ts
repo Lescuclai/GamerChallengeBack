@@ -4,11 +4,7 @@ import { prisma } from "../../prisma/index.js";
 import { User } from "@prisma/client";
 import { registerSchema, loginSchema } from "../schemas/auth.schema.js";
 import { generateAuthenticationTokens } from "../utils/tokens.js";
-import {
-    BadRequestError,
-    ConflictError,
-    UnauthorizedError,
-} from "../utils/errors.js";
+import { JwtRequest } from "../middlewares/authMiddleware.js";
 import { config } from "../../config.js";
 import argon2 from "argon2";
 
@@ -18,9 +14,9 @@ interface Token {
     expiresInMS: number;
 }
 
-export default class AuthController extends BaseController<User> {
+export default class AuthController extends BaseController<User, "user_id"> {
     constructor() {
-        super(prisma.user);
+        super(prisma.user, "user_id");
     }
 
     async login(req: Request, res: Response) {
@@ -28,12 +24,16 @@ export default class AuthController extends BaseController<User> {
 
         const user = await prisma.user.findFirst({ where: { email } });
         if (!user) {
-            throw new UnauthorizedError("Email and password do not match");
+            return res.status(401).json({
+                message: "Email et mot de passe ne correspondent pas",
+            });
         }
 
         const isMatching = await argon2.verify(user.password, password);
         if (!isMatching) {
-            throw new UnauthorizedError("Email and password do not match");
+            return res.status(401).json({
+                message: "Email et mot de passe ne correspondent pas",
+            });
         }
 
         // Token (A voir si on met en place les refresh token)
@@ -53,7 +53,9 @@ export default class AuthController extends BaseController<User> {
             await registerSchema.parseAsync(req.body);
 
         if (password !== confirm) {
-            throw new BadRequestError("Passwords do not match");
+            return res
+                .status(400)
+                .json({ message: "Les mots de passe ne correspondent pas" });
         }
 
         // Verify user doesn't already exists (see if necessary to add findFirst in BaseController)
@@ -62,7 +64,7 @@ export default class AuthController extends BaseController<User> {
         });
 
         if (alreadyExistingUser) {
-            throw new ConflictError("Email already taken");
+            return res.status(409).json({ message: "Email déjà utilisé" });
         }
 
         const hashedPassword = await argon2.hash(password);
@@ -96,6 +98,24 @@ export default class AuthController extends BaseController<User> {
             maxAge: 0,
         });
         res.sendStatus(204);
+    }
+
+    async me(req: JwtRequest, res: Response) {
+        const user = await this.findById(Number(req.user!.id));
+
+        if (!user) {
+            return res.status(404).json({ message: "Utilisateur introuvable" });
+        }
+
+        res.status(200).json({
+            user: {
+                id: user.user_id,
+                pseudo: user.pseudo,
+                email: user.email,
+                role: user.role,
+                avatar: user.avatar,
+            },
+        });
     }
 }
 
