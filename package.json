@@ -15,7 +15,7 @@
         "db:migrate:reset": "docker compose exec gamer-challenges-api npx prisma migrate reset --force",
         "db:migrate:dev": "docker compose exec gamer-challenges-api npx prisma migrate dev --name init",
         "db:generate": "docker compose exec gamer-challenges-api npx prisma generate",
-        "db:reinit": "npm run db:migrate:reset && npm run db:migrate:dev && npm run db:generate"
+        "db:reinit": "npm run db:migrate:reset && npm run db:migrate:dev && npm run db:generate && npm run db:seed"
     },
     "devDependencies": {
         "@eslint/js": "^9.31.0",
