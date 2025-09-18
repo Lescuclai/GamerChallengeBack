@@ -17,4 +17,10 @@ router.post(
     cw((req, res) => authController.login(req, res))
 );
 
+// Logout
+router.post(
+    "/auth/logout",
+    cw((req, res) => authController.logout(req, res))
+);
+
 export default router;

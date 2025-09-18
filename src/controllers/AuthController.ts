@@ -4,6 +4,11 @@ import { prisma } from "../../prisma/index.js";
 import { User } from "@prisma/client";
 import { registerSchema, loginSchema } from "../schemas/auth.schema.js";
 import { generateAuthenticationTokens } from "../utils/tokens.js";
+import {
+    BadRequestError,
+    ConflictError,
+    UnauthorizedError,
+} from "../utils/errors.js";
 import { config } from "../../config.js";
 import argon2 from "argon2";
 
@@ -23,12 +28,12 @@ export default class AuthController extends BaseController<User> {
 
         const user = await prisma.user.findFirst({ where: { email } });
         if (!user) {
-            throw new Error("Email and password do not match");
+            throw new UnauthorizedError("Email and password do not match");
         }
 
         const isMatching = await argon2.verify(user.password, password);
         if (!isMatching) {
-            throw new Error("Email and password do not match");
+            throw new UnauthorizedError("Email and password do not match");
         }
 
         // Token (A voir si on met en place les refresh token)
@@ -37,7 +42,7 @@ export default class AuthController extends BaseController<User> {
         setAccessTokenCookie(res, accessToken);
 
         return res.json({
-            message: "Connecté",
+            message: "Connecté avec succès",
             pseudo: user.pseudo,
             avatar: user.avatar,
         });
@@ -48,7 +53,7 @@ export default class AuthController extends BaseController<User> {
             await registerSchema.parseAsync(req.body);
 
         if (password !== confirm) {
-            throw new Error("Les mots de passes ne sont pas identiques !");
+            throw new BadRequestError("Passwords do not match");
         }
 
         // Verify user doesn't already exists (see if necessary to add findFirst in BaseController)
@@ -57,7 +62,7 @@ export default class AuthController extends BaseController<User> {
         });
 
         if (alreadyExistingUser) {
-            throw new Error("Email already taken"); // TODO : Make specific errors
+            throw new ConflictError("Email already taken");
         }
 
         const hashedPassword = await argon2.hash(password);
@@ -82,6 +87,15 @@ export default class AuthController extends BaseController<User> {
             created_at: user.created_at,
             updated_at: user.updated_at,
         });
+    }
+
+    async logout(_: Request, res: Response) {
+        res.cookie("accessToken", "", {
+            httpOnly: true,
+            secure: config.server.secure,
+            maxAge: 0,
+        });
+        res.sendStatus(204);
     }
 }
 
