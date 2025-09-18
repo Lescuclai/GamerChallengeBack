@@ -92,11 +92,7 @@ export default class AuthController extends BaseController<User, "user_id"> {
     }
 
     async logout(_: Request, res: Response) {
-        res.cookie("accessToken", "", {
-            httpOnly: true,
-            secure: config.server.secure,
-            maxAge: 0,
-        });
+        deleteAccessTokenCookie(res);
         res.sendStatus(204);
     }
 
@@ -135,11 +131,7 @@ export default class AuthController extends BaseController<User, "user_id"> {
             deleted_at: new Date(),
         });
 
-        res.cookie("accessToken", "", {
-            httpOnly: true,
-            secure: config.server.secure,
-            maxAge: 0,
-        });
+        deleteAccessTokenCookie(res);
 
         res.sendStatus(204);
     }
@@ -151,5 +143,13 @@ function setAccessTokenCookie(res: Response, accessToken: Token) {
         httpOnly: true,
         maxAge: accessToken.expiresInMS,
         secure: config.server.secure,
+    });
+}
+
+function deleteAccessTokenCookie(res: Response) {
+    res.cookie("accessToken", "", {
+        httpOnly: true,
+        secure: config.server.secure,
+        maxAge: 0,
     });
 }
