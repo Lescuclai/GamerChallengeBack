@@ -43,8 +43,13 @@ export default class AuthController extends BaseController<User, "user_id"> {
 
         return res.status(200).json({
             message: "Connecté avec succès",
-            pseudo: user.pseudo,
-            avatar: user.avatar,
+            user: {
+                id: user.user_id,
+                pseudo: user.pseudo,
+                email: user.email,
+                role: user.role,
+                avatar: user.avatar,
+            },
         });
     }
 
@@ -83,11 +88,15 @@ export default class AuthController extends BaseController<User, "user_id"> {
 
         res.status(201).json({
             message: "Utilisateur créé avec succès",
-            id: user.user_id,
-            pseudo: user.pseudo,
-            email: user.email,
-            created_at: user.created_at,
-            updated_at: user.updated_at,
+            user: {
+                id: user.user_id,
+                pseudo: user.pseudo,
+                email: user.email,
+                role: user.role,
+                avatar: user.avatar,
+                created_at: user.created_at,
+                updated_at: user.updated_at,
+            },
         });
     }
 
