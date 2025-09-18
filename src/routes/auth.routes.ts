@@ -27,4 +27,10 @@ router.get(
     cw((req, res) => authController.me(req, res))
 );
 
+router.patch(
+    "/delete/:userId",
+    verifyToken,
+    cw((req, res) => authController.softDeleteUser(req, res))
+);
+
 export default router;

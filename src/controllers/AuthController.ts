@@ -117,6 +117,32 @@ export default class AuthController extends BaseController<User, "user_id"> {
             },
         });
     }
+
+    async softDeleteUser(req: JwtRequest, res: Response) {
+        const userId = Number(req.params.userId);
+
+        if (userId !== req.user!.id) {
+            return res.status(403).json({ message: "Action non autorisée" });
+        }
+
+        const randomHash = await argon2.hash(Math.random().toString());
+
+        await this.update(userId, {
+            pseudo: `deleted_user(${userId})`,
+            email: `deleted_user_${userId}_${Date.now()}@deleted.com`,
+            password: randomHash,
+            avatar: "",
+            deleted_at: new Date(),
+        });
+
+        res.cookie("accessToken", "", {
+            httpOnly: true,
+            secure: config.server.secure,
+            maxAge: 0,
+        });
+
+        res.sendStatus(204);
+    }
 }
 
 function setAccessTokenCookie(res: Response, accessToken: Token) {
