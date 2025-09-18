@@ -5,21 +5,18 @@ import AuthController from "../controllers/AuthController.js";
 const router = Router();
 const authController = new AuthController();
 
-// Register (Pas clair les noms de route, à revoir)
 router.post(
-    "/users",
+    "/register",
     cw((req, res) => authController.register(req, res))
 );
 
-// Login
 router.post(
-    "/auth",
+    "/login",
     cw((req, res) => authController.login(req, res))
 );
 
-// Logout
 router.post(
-    "/auth/logout",
+    "/logout",
     cw((req, res) => authController.logout(req, res))
 );
 
