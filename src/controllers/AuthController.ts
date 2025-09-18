@@ -1,10 +1,10 @@
 import BaseController from "./BaseController.js";
 import type { Request, Response } from "express";
 import { prisma } from "../../prisma/index.js";
+import { User } from "@prisma/client";
 import { registerSchema, loginSchema } from "../schemas/auth.schema.js";
 import { generateAuthenticationTokens } from "../utils/tokens.js";
 import { config } from "../../config.js";
-import jwt from "jsonwebtoken";
 import argon2 from "argon2";
 
 interface Token {
@@ -13,7 +13,7 @@ interface Token {
     expiresInMS: number;
 }
 
-export default class AuthController extends BaseController<any> {
+export default class AuthController extends BaseController<User> {
     constructor() {
         super(prisma.user);
     }
@@ -38,7 +38,8 @@ export default class AuthController extends BaseController<any> {
 
         return res.json({
             message: "Connecté",
-            accessToken,
+            pseudo: user.pseudo,
+            avatar: user.avatar,
         });
     }
 
@@ -68,11 +69,14 @@ export default class AuthController extends BaseController<any> {
             avatar,
         });
 
-        // Connect user here and create JWT
+        // Send access token to connect after register (delay ?)
+
+        const accessToken = generateAuthenticationTokens(user);
+        setAccessTokenCookie(res, accessToken);
 
         res.status(201).json({
             message: "Utilisateur créé avec succès",
-            id: user.id,
+            id: user.user_id,
             pseudo: user.pseudo,
             email: user.email,
             created_at: user.created_at,
@@ -82,6 +86,7 @@ export default class AuthController extends BaseController<any> {
 }
 
 function setAccessTokenCookie(res: Response, accessToken: Token) {
+    // Maybe add sameSite: "strict"
     res.cookie("accessToken", accessToken.token, {
         httpOnly: true,
         maxAge: accessToken.expiresInMS,
