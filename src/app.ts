@@ -6,7 +6,7 @@ import { router } from "./router.js";
 
 export const app = express();
 
-app.use(cors({ origin: config.server.allowedOrigins }));
+app.use(cors({ origin: config.server.allowedOrigins, credentials: true }));
 app.use(cookieParser());
 app.disable("x-powered-by");
 
