@@ -21,20 +21,17 @@ export const verifyToken = (
     next: NextFunction
 ) => {
     const accessToken = req.cookies?.accessToken;
-
     if (!accessToken || accessToken.trim() === "") {
         return res.status(401).json({ message: "Utilisateur non authentifié" });
     }
 
     try {
         const decoded = jwt.verify(accessToken, getJwtSecret()) as JwtPayload;
-
         if (!decoded || !decoded.id) {
             return res
                 .status(401)
                 .json({ message: "Utilisateur non authentifié" });
         }
-
         req.user = decoded;
 
         next();

@@ -1,11 +1,8 @@
-import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
-import { prisma } from "../../prisma/index.js";
+import { User } from "@prisma/client";
 import { config } from "../../config.js";
 
-type UserType = NonNullable<Awaited<ReturnType<typeof prisma.user.findUnique>>>;
-
-export function generateAuthenticationTokens(user: UserType) {
+export function generateAuthenticationTokens(user: User) {
     const payload = {
         id: user.user_id,
         role: user.role,

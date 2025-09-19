@@ -36,7 +36,7 @@ export default class AuthController extends BaseController<User, "user_id"> {
             });
         }
 
-        // Token (A voir si on met en place les refresh token)
+        // TODO : Add refresh tokens
 
         const accessToken = generateAuthenticationTokens(user);
         setAccessTokenCookie(res, accessToken);
@@ -63,7 +63,6 @@ export default class AuthController extends BaseController<User, "user_id"> {
                 .json({ message: "Les mots de passe ne correspondent pas" });
         }
 
-        // Verify user doesn't already exists (see if necessary to add findFirst in BaseController)
         const alreadyExistingUser = await prisma.user.findFirst({
             where: { email },
         });
@@ -80,8 +79,6 @@ export default class AuthController extends BaseController<User, "user_id"> {
             password: hashedPassword,
             avatar,
         });
-
-        // Send access token to connect after register (delay ?)
 
         const accessToken = generateAuthenticationTokens(user);
         setAccessTokenCookie(res, accessToken);

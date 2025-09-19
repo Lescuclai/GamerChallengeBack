@@ -23,7 +23,7 @@ services:
         volumes:
             - .:/app
         ports:
-            - "${PORT}:3000"
+            - "${PORT}:5000"
         environment:
             - NODE_ENV=development
             - PGHOST=gamer-challenges-db
