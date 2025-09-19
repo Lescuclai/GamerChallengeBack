@@ -1,0 +1,118 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  member
+  admin
+}
+
+model User {
+  user_id Int @id @default(autoincrement())
+
+  pseudo String
+  email  String @unique()
+  password  String
+  avatar String
+  role      Role   @default(member)
+
+  challenges Challenge[]
+  entries Entry[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  deleted_at DateTime?
+
+  challengesVotes VoteUserChallenge[]
+  entryVotes VoteUserEntry[]
+
+  @@map("user")
+}
+
+model Game {
+  game_id Int @id @default(autoincrement())
+
+  title String
+  image_url  String
+
+  challenges Challenge[]
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  deleted_at DateTime?
+
+  @@map("game")
+}
+
+model Challenge {
+  challenge_id Int @id @default(autoincrement())
+
+  title String
+  description  String
+  rules  String
+
+  user  User @relation(fields: [user_id], references: [user_id])
+  user_id Int
+  
+  game  Game @relation(fields: [game_id], references: [game_id])
+  game_id Int
+  
+  entries Entry[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  deleted_at DateTime?
+
+  challengeVoters VoteUserChallenge[]
+
+  @@map("challenge")
+}
+
+model Entry {
+  entry_id Int @id @default(autoincrement())
+
+  title String
+  video_url  String
+  password  String
+
+  user  User @relation(fields: [user_id], references: [user_id])
+  user_id Int
+  
+  challenge  Challenge @relation(fields: [challenge_id], references: [challenge_id])
+  challenge_id Int
+  
+  votes VoteUserEntry[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  deleted_at DateTime?
+
+  @@map("entry")
+}
+
+model VoteUserChallenge {
+  user_id      Int
+  challenge_id Int
+
+  user        User      @relation(fields: [user_id], references: [user_id])
+  challenge   Challenge @relation(fields: [challenge_id], references: [challenge_id])
+
+  @@id([user_id, challenge_id])
+  @@map("vote_user_challenge")
+}
+
+model VoteUserEntry {
+  user_id      Int
+  entry_id Int
+
+  user        User      @relation(fields: [user_id], references: [user_id])
+  entry       Entry      @relation(fields: [entry_id], references: [entry_id])
+
+  @@id([user_id, entry_id])
+  @@map("vote_user_entry")
+}
