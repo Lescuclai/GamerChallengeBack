@@ -8,10 +8,21 @@ interface GameResponse {
   thumbnail: string;
 }
 const hashedPassword = await argon2.hash("test");
-await prisma.voteUserChallenge.deleteMany();
-await prisma.voteUserEntry.deleteMany();
-await prisma.entry.deleteMany();
-await prisma.challenge.deleteMany();
+const shuffleData = <T>(data: T[], count: number): T[] => {
+  const shuffle = [...data];
+  for (let index = shuffle.length - 1; index > 0; index--) {
+    const j = Math.floor(Math.random() * (index + 1));
+    [([shuffle[index], shuffle[j]] = [shuffle[j], shuffle[index]])];
+  }
+  return shuffle.slice(0, count);
+};
+const clearSeeding = async () => {
+  await prisma.voteUserChallenge.deleteMany();
+  await prisma.voteUserEntry.deleteMany();
+  await prisma.entry.deleteMany();
+  await prisma.challenge.deleteMany();
+};
+
 const SeedGames = async () => {
   const response = await fetch("https://www.freetogame.com/api/games");
   const games: GameResponse[] = await response.json();
@@ -169,7 +180,6 @@ const SeedEntries = async () => {
       entries.push({
         title: randomTitle,
         video_url: randomVideo,
-        password: "test",
         user_id: randomUser.user_id,
         challenge_id: challenge.challenge_id,
       });
@@ -192,9 +202,7 @@ const seedVoteChallenge = async () => {
   const voteChallengeData: any[] = [];
   for (const user of allUsers) {
     const nbVotes = Math.floor(Math.random() * 6);
-    const shuffledChallenges = allChallenges
-      .sort(() => 0.5 - Math.random())
-      .slice(0, nbVotes);
+    const shuffledChallenges = shuffleData(allChallenges, nbVotes);
     for (const ch of shuffledChallenges) {
       voteChallengeData.push({
         user_id: user.user_id,
@@ -213,11 +221,10 @@ const seedVoteUserEntry = async () => {
   const allUsers = await prisma.user.findMany();
   const allEntries = await prisma.entry.findMany();
   const voteEntryData: any[] = [];
+
   for (const user of allUsers) {
     const nbVotes = Math.floor(Math.random() * 6);
-    const shuffledEntries = allEntries
-      .sort(() => 0.5 - Math.random())
-      .slice(0, nbVotes);
+    const shuffledEntries = shuffleData(allEntries, nbVotes);
     for (const entry of shuffledEntries) {
       voteEntryData.push({
         user_id: user.user_id,
@@ -225,13 +232,14 @@ const seedVoteUserEntry = async () => {
       });
     }
   }
+
   await prisma.voteUserEntry.createMany({
     data: voteEntryData,
     skipDuplicates: true,
   });
   console.log(`✅ ${voteEntryData.length} Votes sur entries créés`);
 };
-
+await clearSeeding();
 await SeedUsers();
 await SeedGames();
 await SeedChallenge();

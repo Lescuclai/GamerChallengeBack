@@ -78,7 +78,6 @@ model Entry {
 
   title String
   video_url  String
-  password  String
 
   user  User @relation(fields: [user_id], references: [user_id])
   user_id Int
