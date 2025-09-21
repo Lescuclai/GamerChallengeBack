@@ -1,3 +1,3 @@
-import { xss } from "express-xss-sanitizer";
+import { xss } from "express-xss-sanitizer"
 
-export const xssSanitizer = xss();
+export const xssSanitizer = xss()

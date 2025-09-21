@@ -1,12 +1,12 @@
-import { Router } from "express";
-import authRoutes from "./routes/auth.routes.js";
+import { Router } from "express"
+import authRoutes from "./routes/auth.routes.js"
 
-export const router = Router();
+export const router = Router()
 
 //Routes
-router.use("/auth", authRoutes);
+router.use("/auth", authRoutes)
 
 //Default 404
 router.use((req, res) => {
-    res.status(404).json({ error: "Not found" });
-});
+  res.status(404).json({ error: "Not found" })
+})
