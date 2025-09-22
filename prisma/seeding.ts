@@ -1,33 +1,33 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Role } from "@prisma/client"
+import { Role, VoteUserChallenge, VoteUserEntry } from "@prisma/client"
 import { prisma } from "./index.js"
 import argon2 from "argon2"
+import { shuffleData } from "../src/utils/shuffleData.js"
 
 interface GameResponse {
   title: string
   thumbnail: string
 }
-const hashedPassword = await argon2.hash("test")
-const shuffleData = <T>(data: T[], count: number): T[] => {
-  const shuffle = [...data]
-  for (let index = shuffle.length - 1; index > 0; index--) {
-    const j: number = Math.floor(Math.random() * (index + 1))[
-      ([shuffle[index], shuffle[j]] = [shuffle[j], shuffle[index]])
-    ]
-  }
-  return shuffle.slice(0, count)
+interface EntryInterface {
+  title: string
+  video_url: string
+  user_id: number
+  challenge_id: number
 }
+const { challenge, entry, game, user, voteUserChallenge, voteUserEntry } =
+  prisma
+const hashedPassword = await argon2.hash("test")
+
 const clearSeeding = async () => {
-  await prisma.voteUserChallenge.deleteMany()
-  await prisma.voteUserEntry.deleteMany()
-  await prisma.entry.deleteMany()
-  await prisma.challenge.deleteMany()
+  await voteUserChallenge.deleteMany()
+  await voteUserEntry.deleteMany()
+  await entry.deleteMany()
+  await challenge.deleteMany()
 }
 
 const SeedGames = async () => {
   const response = await fetch("https://www.freetogame.com/api/games")
   const games: GameResponse[] = await response.json()
-  await prisma.game.createMany({
+  await game.createMany({
     data: games.map(({ title, thumbnail }) => ({
       title,
       image_url: thumbnail,
@@ -50,25 +50,6 @@ const SeedUsers = async () => {
     "https://i.pravatar.cc/150?img=9",
     "https://i.pravatar.cc/150?img=10",
   ]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const userList: any[] = [
-    {
-      pseudo: "Romain",
-      email: "romain@oclock.io",
-      password: hashedPassword,
-      avatar:
-        "https://sm.ign.com/t/ign_fr/cover/a/avatar-gen/avatar-generations_bssq.600.jpg",
-      role: "admin",
-    },
-    {
-      pseudo: "Joe",
-      email: "joe@oclock.io",
-      password: hashedPassword,
-      avatar:
-        "https://sm.ign.com/t/ign_fr/cover/a/avatar-gen/avatar-generations_bssq.600.jpg",
-      role: "member",
-    },
-  ]
 
   const users = Array.from({ length: 40 }).map((_, i) => ({
     pseudo: `User${i + 1}`,
@@ -78,8 +59,8 @@ const SeedUsers = async () => {
     role: i < 5 ? Role.admin : Role.member,
   }))
 
-  await prisma.user.createMany({
-    data: [...users, ...userList],
+  await user.createMany({
+    data: [...users],
     skipDuplicates: true,
   })
 
@@ -87,14 +68,14 @@ const SeedUsers = async () => {
 }
 
 const SeedChallenge = async () => {
-  const games = await prisma.game.findMany({ take: 20 })
+  const games = await game.findMany({ take: 20 })
   if (games.length === 0) {
     console.log("Aucun jeux")
     return
   }
-  const user = await prisma.user.findMany({ take: 2 })
-  if (user.length === 0) {
-    console.log("User")
+  const users = await user.findMany({ take: 2 })
+  if (users.length === 0) {
+    console.log("Aucun User")
     return
   }
   const sampleTitles = [
@@ -129,7 +110,7 @@ const SeedChallenge = async () => {
 
   const challenges = Array.from({ length: 20 }).map((_, index) => {
     const randomGame = games[Math.floor(Math.random() * games.length)]
-    const randomUser = user[Math.floor(Math.random() * user.length)]
+    const randomUser = users[Math.floor(Math.random() * users.length)]
     return {
       title: sampleTitles[index % sampleTitles.length],
       description: sampleDescriptions[index % sampleDescriptions.length],
@@ -138,7 +119,7 @@ const SeedChallenge = async () => {
       game_id: randomGame.game_id,
     }
   })
-  await prisma.challenge.createMany({
+  await challenge.createMany({
     data: challenges,
     skipDuplicates: true,
   })
@@ -146,8 +127,8 @@ const SeedChallenge = async () => {
 }
 
 const SeedEntries = async () => {
-  const challenges = await prisma.challenge.findMany()
-  const users = await prisma.user.findMany()
+  const challenges = await challenge.findMany()
+  const users = await user.findMany()
   if (challenges.length === 0 || users.length === 0) {
     console.log(
       "Pas de challenges ou d’utilisateurs pour créer des participations"
@@ -168,7 +149,7 @@ const SeedEntries = async () => {
     "https://www.youtube.com/watch?v=V-_O7nl0Ii0",
   ]
 
-  const entries: any[] = []
+  const entries: EntryInterface[] = []
   for (const challenge of challenges) {
     const nbEntries = Math.floor(Math.random() * 4)
 
@@ -188,7 +169,7 @@ const SeedEntries = async () => {
     }
   }
   if (entries.length > 0) {
-    await prisma.entry.createMany({
+    await entry.createMany({
       data: entries,
       skipDuplicates: true,
     })
@@ -199,9 +180,9 @@ const SeedEntries = async () => {
 }
 
 const seedVoteChallenge = async () => {
-  const allChallenges = await prisma.challenge.findMany()
-  const allUsers = await prisma.user.findMany()
-  const voteChallengeData: any[] = []
+  const allChallenges = await challenge.findMany()
+  const allUsers = await user.findMany()
+  const voteChallengeData: VoteUserChallenge[] = []
   for (const user of allUsers) {
     const nbVotes = Math.floor(Math.random() * 6)
     const shuffledChallenges = shuffleData(allChallenges, nbVotes)
@@ -212,7 +193,7 @@ const seedVoteChallenge = async () => {
       })
     }
   }
-  await prisma.voteUserChallenge.createMany({
+  await voteUserChallenge.createMany({
     data: voteChallengeData,
     skipDuplicates: true,
   })
@@ -220,9 +201,9 @@ const seedVoteChallenge = async () => {
 }
 
 const seedVoteUserEntry = async () => {
-  const allUsers = await prisma.user.findMany()
-  const allEntries = await prisma.entry.findMany()
-  const voteEntryData: any[] = []
+  const allUsers = await user.findMany()
+  const allEntries = await entry.findMany()
+  const voteEntryData: VoteUserEntry[] = []
 
   for (const user of allUsers) {
     const nbVotes = Math.floor(Math.random() * 6)
@@ -235,7 +216,7 @@ const seedVoteUserEntry = async () => {
     }
   }
 
-  await prisma.voteUserEntry.createMany({
+  await voteUserEntry.createMany({
     data: voteEntryData,
     skipDuplicates: true,
   })
