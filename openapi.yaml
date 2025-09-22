@@ -1,0 +1,217 @@
+openapi: 3.0.4
+info:
+  title: Swagger Gamer Challenges - OpenAPI 3.0
+  description: |-
+    This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about
+    Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!
+    You can now help us improve the API whether it's by making changes to the definition itself or to the code.
+    That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
+
+    Some useful links:
+    - [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
+    - [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
+  termsOfService: https://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.12
+externalDocs:
+  description: Find out more about Swagger
+  url: https://swagger.io
+servers:
+  - url: https://localhost:5000/api/
+tags:
+  - name: auth
+    description: Access to account
+    externalDocs:
+      description: connect to database
+      url: https://swagger.io
+  - name: logout
+    description: Disconnect from application
+    externalDocs:
+      description: Learn more about logout
+      url: https://swagger.io
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: Register a new user
+      description: Register a new user by providing email, password, and other details.
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisterResponse"
+        "400":
+          description: Passwords do not match
+        "409":
+          description: Email already in use
+
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Login user
+      description: Authenticate user and return access token as cookie.
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: Logout user
+      description: Clear the access token cookie.
+      operationId: logoutUser
+      responses:
+        "204":
+          description: Successfully logged out
+
+  /auth/me:
+    get:
+      tags:
+        - auth
+      summary: Get current user
+      description: Retrieve the currently authenticated user's profile.
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: User not found
+
+  /auth/delete/{userId}:
+    patch:
+      tags:
+        - auth
+      summary: Soft delete user
+      description: Soft deletes the user account by anonymizing user data.
+      operationId: softDeleteUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: User soft-deleted
+        "403":
+          description: Forbidden - user not authorized
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - pseudo
+        - email
+        - password
+        - confirm
+      properties:
+        pseudo:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        confirm:
+          type: string
+          format: password
+        avatar:
+          type: string
+          nullable: true
+
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        pseudo:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+        avatar:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
