@@ -37,7 +37,7 @@ model User {
 model Game {
   game_id Int @id @default(autoincrement())
 
-  title String
+  title String @unique
   image_url  String
 
   challenges Challenge[]
@@ -78,7 +78,6 @@ model Entry {
 
   title String
   video_url  String
-  password  String
 
   user  User @relation(fields: [user_id], references: [user_id])
   user_id Int
