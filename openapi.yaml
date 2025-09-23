@@ -2,17 +2,11 @@ openapi: 3.0.4
 info:
   title: Swagger Gamer Challenges - OpenAPI 3.0
   description: |-
-    This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about
-    Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we've switched to the design first approach!
-    You can now help us improve the API whether it's by making changes to the definition itself or to the code.
-    That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
-
-    Some useful links:
-    - [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
-    - [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
-  termsOfService: https://swagger.io/terms/
+    Our project Gamer Challenges is a student project to join gamer around the world to challenge in games playing. 
+    User are updating video games on show people our records gaming.
+  termsOfService: https://GamerChallenges.io/terms/
   contact:
-    email: apiteam@swagger.io
+    email: gamerChallenge@gmail.com
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
@@ -22,6 +16,7 @@ externalDocs:
   url: https://swagger.io
 servers:
   - url: https://localhost:5000/api/
+
 tags:
   - name: auth
     description: Access to account
@@ -33,7 +28,6 @@ tags:
     externalDocs:
       description: Learn more about logout
       url: https://swagger.io
-
 paths:
   /auth/register:
     post:
@@ -59,7 +53,6 @@ paths:
           description: Passwords do not match
         "409":
           description: Email already in use
-
   /auth/login:
     post:
       tags:
@@ -82,7 +75,6 @@ paths:
                 $ref: "#/components/schemas/LoginResponse"
         "401":
           description: Invalid credentials
-
   /auth/logout:
     post:
       tags:
@@ -93,7 +85,6 @@ paths:
       responses:
         "204":
           description: Successfully logged out
-
   /auth/me:
     get:
       tags:
@@ -112,7 +103,6 @@ paths:
                 $ref: "#/components/schemas/User"
         "404":
           description: User not found
-
   /auth/delete/{userId}:
     patch:
       tags:
@@ -133,14 +123,12 @@ paths:
           description: User soft-deleted
         "403":
           description: Forbidden - user not authorized
-
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   schemas:
     RegisterRequest:
       type: object
@@ -161,10 +149,6 @@ components:
         confirm:
           type: string
           format: password
-        avatar:
-          type: string
-          nullable: true
-
     RegisterResponse:
       type: object
       properties:
@@ -172,7 +156,6 @@ components:
           type: string
         user:
           $ref: "#/components/schemas/User"
-
     LoginRequest:
       type: object
       required:
@@ -185,7 +168,6 @@ components:
         password:
           type: string
           format: password
-
     LoginResponse:
       type: object
       properties:
@@ -193,7 +175,6 @@ components:
           type: string
         user:
           $ref: "#/components/schemas/User"
-
     User:
       type: object
       properties:
@@ -205,11 +186,6 @@ components:
           type: string
           format: email
         role:
-          type: string
-        avatar:
-          type: string
-          nullable: true
-        created_at:
           type: string
           format: date-time
         updated_at:
