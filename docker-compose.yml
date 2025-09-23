@@ -41,9 +41,9 @@ services:
     restart: unless-stopped
     networks:
       - gamerchallenge-network
-  adminer:
+  gamer-challenges-adminer:
     image: adminer:latest
-    container_name: adminer
+    container_name: gamer-challenges-adminer
     restart: always
     ports:
       - "8080:8080"

@@ -1,7 +1,7 @@
 import { Router } from "express"
 import authRoutes from "./routes/auth.routes.js"
 import challengeRoutes from "./routes/challenge.route.js"
-import userRoutes from "./routes/user.routes.js"
+import entryRoutes from "./routes/entry.routes.js"
 import swaggerJSDoc from "swagger-jsdoc"
 import swaggerUi from "swagger-ui-express"
 import path from "node:path"
@@ -15,7 +15,7 @@ export const router = Router()
 //Routes
 router.use("/auth", authRoutes)
 router.use("/challenges", challengeRoutes)
-router.use("/entries", userRoutes)
+router.use("/entries", entryRoutes)
 
 //Default 404
 

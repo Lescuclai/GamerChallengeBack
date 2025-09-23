@@ -8,7 +8,7 @@ router.get(
   cw((req, res) => challengeController.newestChallenges(req, res))
 )
 router.get(
-  "/moreLiked",
+  "/most-liked",
   cw((req, res) => challengeController.mostLikedChallenges(req, res))
 )
 export default router

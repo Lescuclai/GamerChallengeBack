@@ -12,6 +12,7 @@ export default class EntryController extends BaseController<Entry, "entry_id"> {
       const data = await prisma.entry.findMany({
         select: {
           entry_id: true,
+          title: true,
           user: {
             select: {
               avatar: true,
