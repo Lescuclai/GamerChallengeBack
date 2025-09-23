@@ -17,8 +17,6 @@ router.use("/auth", authRoutes)
 router.use("/challenges", challengeRoutes)
 router.use("/entries", entryRoutes)
 
-//Default 404
-
 const spec = swaggerJSDoc({
   definition: {
     openapi: "3.0.0",
@@ -65,8 +63,9 @@ const spec = swaggerJSDoc({
   },
   apis: [path.join(__dirname, "./routes/*.routes.js")],
 })
-console.log(__dirname)
+
 router.use("/docs", swaggerUi.serve, swaggerUi.setup(spec))
+//Default 404
 router.use((req, res) => {
   res.status(404).json({ error: "Not found" })
 })
