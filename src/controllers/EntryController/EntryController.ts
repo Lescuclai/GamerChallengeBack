@@ -1,7 +1,7 @@
-import { Entry } from "@prisma/client"
 import BaseController from "../BaseController.js"
 import { prisma } from "../../../prisma/index.js"
 import { Request, Response } from "express"
+import { Entry } from "@prisma/client"
 
 export default class EntryController extends BaseController<Entry, "entry_id"> {
   constructor() {
@@ -20,12 +20,12 @@ export default class EntryController extends BaseController<Entry, "entry_id"> {
         },
         _count: {
           select: {
-            votes: true,
+            entryVoters: true,
           },
         },
       },
       orderBy: {
-        votes: {
+        entryVoters: {
           _count: "desc",
         },
       },
