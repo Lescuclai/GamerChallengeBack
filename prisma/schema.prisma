@@ -85,7 +85,7 @@ model Entry {
   challenge  Challenge @relation(fields: [challenge_id], references: [challenge_id])
   challenge_id Int
   
-  votes VoteUserEntry[]
+  entryVoters VoteUserEntry[]
 
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
