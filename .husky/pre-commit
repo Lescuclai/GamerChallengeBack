@@ -1,0 +1,7 @@
+npm run lint
+npm run format
+git add .
+# Si le schema.prisma a été modifié, rappeler au développeur de créer une migration
+if [ -n "$(git diff --name-only HEAD~1 | grep schema.prisma)" ]; then
+    echo "⚠️ You modified the schema.prisma file. Make sure you also run the 'npm run db:migrate:dev' command to generate the migration file."
+fi
