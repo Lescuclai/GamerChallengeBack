@@ -63,12 +63,24 @@ export default class AuthController extends BaseController<User, "user_id"> {
         .json({ message: "Les mots de passe ne correspondent pas" })
     }
 
-    const alreadyExistingUser = await prisma.user.findFirst({
-      where: { email },
+    const alreadyExistingUser = await prisma.user.findMany({
+      where: {
+        OR: [{ email }, { pseudo }],
+      },
+      select: { email: true, pseudo: true },
     })
 
-    if (alreadyExistingUser) {
-      return res.status(409).json({ message: "Email déjà utilisé" })
+    const errors = alreadyExistingUser.reduce<Record<string, string>>(
+      (acc, user) => {
+        if (user.email === email) acc.email = "Email déjà utilisé"
+        if (user.pseudo === pseudo) acc.pseudo = "Pseudo déjà utilisé"
+        return acc
+      },
+      {}
+    )
+
+    if (Object.keys(errors).length) {
+      return res.status(409).json({ errors })
     }
 
     const hashedPassword = await argon2.hash(password)
