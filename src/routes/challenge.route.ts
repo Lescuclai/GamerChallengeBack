@@ -11,4 +11,8 @@ router.get(
   "/most-liked",
   cw((req, res) => challengeController.mostLikedChallenges(req, res))
 )
+router.get(
+  "/",
+  cw((req, res) => challengeController.findAllWithPagination(req, res))
+)
 export default router
