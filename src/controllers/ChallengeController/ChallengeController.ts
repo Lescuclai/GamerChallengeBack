@@ -2,7 +2,7 @@ import { Challenge } from "@prisma/client"
 import BaseController from "../BaseController.js"
 import { prisma } from "../../../prisma/index.js"
 import { Request, Response } from "express"
-
+import { Pagination } from "../../utils/pagination.js"
 export default class ChallengeController extends BaseController<
   Challenge,
   "challenge_id"
@@ -60,5 +60,8 @@ export default class ChallengeController extends BaseController<
       take: 3,
     })
     return res.status(200).json({ data })
+  }
+  async findAllWithPagination(req: Request, res: Response) {
+    Pagination(req, res, "challenge")
   }
 }
