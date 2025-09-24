@@ -2,7 +2,7 @@ import { Challenge } from "@prisma/client"
 import BaseController from "../BaseController.js"
 import { prisma } from "../../../prisma/index.js"
 import { Request, Response } from "express"
-
+import z from "zod"
 export default class ChallengeController extends BaseController<
   Challenge,
   "challenge_id"
@@ -60,5 +60,25 @@ export default class ChallengeController extends BaseController<
       take: 3,
     })
     return res.status(200).json({ data })
+  }
+  async findAllWithPagination(req: Request, res: Response) {
+    const { page, limit } = await z
+      .object({
+        limit: z.coerce.number().int().min(1).optional().default(5),
+        page: z.coerce.number().int().min(1).optional().default(1),
+      })
+      .parseAsync(req.query)
+    const [challenges, totalPages] = await Promise.all([
+      prisma.challenge.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          game: true,
+        },
+      }),
+      prisma.challenge.count(),
+    ])
+    const nbPages = Math.ceil(totalPages / limit)
+    return res.status(200).json({ challenges, nbPages })
   }
 }
