@@ -48,7 +48,6 @@ CREATE TABLE "public"."entry" (
     "entry_id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
     "video_url" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
     "user_id" INTEGER NOT NULL,
     "challenge_id" INTEGER NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -75,7 +74,13 @@ CREATE TABLE "public"."vote_user_entry" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "user_pseudo_key" ON "public"."user"("pseudo");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "user_email_key" ON "public"."user"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "game_title_key" ON "public"."game"("title");
 
 -- AddForeignKey
 ALTER TABLE "public"."challenge" ADD CONSTRAINT "challenge_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."user"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
