@@ -1,6 +1,13 @@
 import jwt from "jsonwebtoken"
 import { User } from "@prisma/client"
 import { config } from "../../config.js"
+import z from "zod"
+import { JwtPayload } from "../middlewares/authMiddleware.js"
+const jwtPayloadSchema = z.object({
+  id: z.number().int().min(1),
+  role: z.string(),
+})
+export type ValidatedJwtPayload = z.infer<typeof jwtPayloadSchema>
 
 export function generateAuthenticationTokens(user: User) {
   const payload = {
@@ -31,4 +38,23 @@ export function getJwtSecret() {
   }
 
   return JWT_SECRET
+}
+
+export function decodeJwt(token: string): ValidatedJwtPayload | null {
+  if (!token || token.trim() === "") {
+    return null
+  }
+  try {
+    const decoded = jwt.verify(token, getJwtSecret()) as JwtPayload
+    const validationResult = jwtPayloadSchema.safeParse(decoded)
+
+    if (validationResult.success) {
+      return validationResult.data
+    }
+    console.log("Token payload invalide:", validationResult.error)
+    return null
+  } catch (error) {
+    console.log("Erreur décodage token:", error)
+    return null
+  }
 }

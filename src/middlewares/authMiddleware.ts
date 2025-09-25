@@ -1,8 +1,7 @@
-import jwt from "jsonwebtoken"
 import dotenv from "dotenv"
 import { Role } from "@prisma/client"
 import type { Request, Response, NextFunction } from "express"
-import { getJwtSecret } from "../utils/tokens.js"
+import { decodeJwt } from "../utils/tokens.js"
 
 dotenv.config()
 
@@ -26,11 +25,8 @@ export const verifyToken = (
   }
 
   try {
-    const decoded = jwt.verify(accessToken, getJwtSecret()) as JwtPayload
-    if (!decoded || !decoded.id) {
-      return res.status(401).json({ message: "Utilisateur non authentifié" })
-    }
-    req.user = decoded
+    const user = decodeJwt(accessToken)
+    req.user = user as JwtPayload
 
     next()
   } catch {
