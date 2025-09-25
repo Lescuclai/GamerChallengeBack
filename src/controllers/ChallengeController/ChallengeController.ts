@@ -81,4 +81,33 @@ export default class ChallengeController extends BaseController<
     const nbPages = Math.ceil(totalPages / limit)
     return res.status(200).json({ challenges, nbPages })
   }
+  async findUniqueChallenge(req: Request, res: Response) {
+    const { challengeId } = req.params
+    const challenge = await prisma.challenge.findUnique({
+      where: { challenge_id: Number(challengeId) },
+      select: {
+        challenge_id: true,
+        title: true,
+        created_at: true,
+        description: true,
+        rules: true,
+        game: {
+          select: {
+            title: true,
+            image_url: true,
+          },
+        },
+        user: {
+          select: {
+            pseudo: true,
+            avatar: true,
+          },
+        },
+      },
+    })
+    if (!challenge) {
+      return res.status(404).json({ message: "Challenge not found" })
+    }
+    return res.status(200).json({ challenge })
+  }
 }

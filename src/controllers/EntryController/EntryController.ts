@@ -33,4 +33,33 @@ export default class EntryController extends BaseController<Entry, "entry_id"> {
     })
     return res.status(200).json({ data })
   }
+
+  async findAllEntries(req: Request, res: Response) {
+    const { challengeId } = req.params
+    const data = await prisma.challenge.findUnique({
+      where: { challenge_id: Number(challengeId) },
+      select: {
+        entries: {
+          select: {
+            entry_id: true,
+            title: true,
+            video_url: true,
+            user: {
+              select: {
+                pseudo: true,
+                avatar: true,
+              },
+            },
+          },
+          orderBy: {
+            created_at: "desc",
+          },
+        },
+      },
+    })
+    if (!data) {
+      return res.status(404).json({ message: "Challenge not found" })
+    }
+    return res.status(200).json({ data })
+  }
 }
