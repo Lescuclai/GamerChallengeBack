@@ -8,4 +8,8 @@ router.get(
   "/most-liked",
   cw((req, res) => entryController.mostLikedEntries(req, res))
 )
+router.get(
+  "/:challengeId",
+  cw((req, res) => entryController.findAllEntries(req, res))
+)
 export default router
