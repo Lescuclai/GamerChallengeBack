@@ -1,12 +1,13 @@
 import { Router } from "express"
+import path from "node:path"
+import { dirname } from "path"
+import swaggerJSDoc from "swagger-jsdoc"
+import swaggerUi from "swagger-ui-express"
+import { fileURLToPath } from "url"
 import authRoutes from "./routes/auth.routes.js"
 import challengeRoutes from "./routes/challenge.route.js"
 import entryRoutes from "./routes/entry.routes.js"
-import swaggerJSDoc from "swagger-jsdoc"
-import swaggerUi from "swagger-ui-express"
-import path from "node:path"
-import { fileURLToPath } from "url"
-import { dirname } from "path"
+import gameRoutes from "./routes/game.routes.js"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -16,6 +17,7 @@ export const router = Router()
 router.use("/auth", authRoutes)
 router.use("/challenges", challengeRoutes)
 router.use("/entries", entryRoutes)
+router.use("/games", gameRoutes)
 
 const spec = swaggerJSDoc({
   definition: {
@@ -61,7 +63,7 @@ const spec = swaggerJSDoc({
       },
     },
   },
-  apis: [path.join(__dirname, "./routes/*.routes.js")],
+  apis: [path.join(__dirname, "../src/docs/openapi.yml")],
 })
 
 router.use("/docs", swaggerUi.serve, swaggerUi.setup(spec))
