@@ -24,6 +24,8 @@ tags:
     description: Manage and fetch available games
   - name: logout
     description: Disconnect from application
+  - name: challenges
+    description: Create and manage gaming challenges
 
 paths:
   /auth/register:
@@ -147,6 +149,47 @@ paths:
         "500":
           description: Server error
 
+  /challenges:
+    post:
+      tags:
+        - challenges
+      summary: Create a new challenge
+      description: Create a new gaming challenge with validation rules.
+      operationId: createChallenge
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChallengeCreateRequest"
+      responses:
+        "201":
+          description: Challenge successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChallengeCreateResponse"
+        "400":
+          description: Validation failed - invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "404":
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -233,3 +276,103 @@ components:
           type: string
           format: uri
           example: "https://www.example.com/lol.jpg"
+
+    ChallengeCreateRequest:
+      type: object
+      required:
+        - title
+        - description
+        - rules
+        - game_title
+        - userId
+      properties:
+        title:
+          type: string
+          minLength: 3
+          description: Challenge title with minimum 3 characters
+          example: "Weekly Tournament"
+        description:
+          type: string
+          minLength: 10
+          description: Challenge description with minimum 10 characters
+          example: "Compete in this weekly tournament to win amazing prizes!"
+        rules:
+          type: string
+          minLength: 10
+          description: Challenge rules with minimum 10 characters
+          example: "No cheating allowed. Fair play required. Best of 3 matches."
+        game_title:
+          type: string
+          description: Title of the game for this challenge
+          example: "League of Legends"
+        userId:
+          type: integer
+          description: ID of the user creating the challenge
+          example: 1
+
+    ChallengeCreateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Challenge créé"
+        challenge:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            title:
+              type: string
+              example: "Weekly Tournament"
+            description:
+              type: string
+              example: "Compete in this weekly tournament to win amazing prizes!"
+            rules:
+              type: string
+              example: "No cheating allowed. Fair play required. Best of 3 matches."
+            game_id:
+              type: integer
+              example: 1
+            user_id:
+              type: integer
+              example: 1
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Validation échouée"
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                example: "too_small"
+              path:
+                type: array
+                items:
+                  type: string
+                example: ["title"]
+              message:
+                type: string
+                example: "Le titre doit contenir au moins 3 caractères"
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Erreur serveur"
+        details:
+          type: string
+          example: "Database connection failed"

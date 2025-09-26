@@ -15,4 +15,10 @@ router.get(
   "/",
   cw((req, res) => challengeController.findAllWithPagination(req, res))
 )
+
+router.post(
+  "/",
+  cw((req, res) => challengeController.createChallenge(req, res))
+)
+
 export default router
