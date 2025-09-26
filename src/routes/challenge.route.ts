@@ -21,4 +21,10 @@ router.get(
   "/:challengeId",
   cw((req, res) => challengeController.findUniqueChallenge(req, res))
 )
+
+router.post(
+  "/",
+  cw((req, res) => challengeController.createChallenge(req, res))
+)
+
 export default router

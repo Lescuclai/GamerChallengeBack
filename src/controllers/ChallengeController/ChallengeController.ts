@@ -1,10 +1,11 @@
 import { Challenge } from "@prisma/client"
-import BaseController from "../BaseController.js"
-import { prisma } from "../../../prisma/index.js"
 import { Request, Response } from "express"
 import z from "zod"
 import { JwtRequest } from "../../middlewares/authMiddleware.js"
 import { decodeJwt } from "../../utils/tokens.js"
+import { prisma } from "../../../prisma/index.js"
+import { challengeSchema } from "../../schemas/challenge.schema.js"
+import BaseController from "../BaseController.js"
 export default class ChallengeController extends BaseController<
   Challenge,
   "challenge_id"
@@ -12,6 +13,7 @@ export default class ChallengeController extends BaseController<
   constructor() {
     super(prisma.challenge, "challenge_id")
   }
+
   async newestChallenges(req: Request, res: Response) {
     const data = await prisma.challenge.findMany({
       select: {
@@ -152,5 +154,43 @@ export default class ChallengeController extends BaseController<
       return res.status(404).json({ message: "Challenge not found" })
     }
     return res.status(200).json({ challenge })
+  }
+  //Challenge
+  async createChallenge(req: Request, res: Response) {
+    const result = challengeSchema.safeParse(req.body)
+    if (!result.success) {
+      return res.status(400).json({
+        error: "Validation échouée",
+        details: result.error.issues,
+      })
+    }
+    try {
+      const { title, description, rules, game_title, userId } = result.data
+      const game = await prisma.game.findUnique({
+        where: { title: game_title },
+      })
+
+      if (!game) {
+        return res.status(404).json({ error: "Jeu non trouvé" })
+      }
+
+      const newChallenge = await this.create({
+        title,
+        description,
+        rules,
+        game_id: game.game_id,
+        user_id: userId,
+      })
+      return res.status(201).json({
+        message: "Challenge créé",
+        challenge: newChallenge,
+      })
+    } catch (err: unknown) {
+      console.error(err)
+      return res.status(500).json({
+        error: "Erreur serveur",
+        details: err instanceof Error ? err.message : "Erreur inconnue",
+      })
+    }
   }
 }
