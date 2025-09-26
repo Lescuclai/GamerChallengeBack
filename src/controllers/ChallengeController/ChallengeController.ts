@@ -6,6 +6,7 @@ import { decodeJwt } from "../../utils/tokens.js"
 import { prisma } from "../../../prisma/index.js"
 import { challengeSchema } from "../../schemas/challenge.schema.js"
 import BaseController from "../BaseController.js"
+
 export default class ChallengeController extends BaseController<
   Challenge,
   "challenge_id"
