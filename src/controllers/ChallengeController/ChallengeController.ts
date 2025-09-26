@@ -78,7 +78,6 @@ export default class ChallengeController extends BaseController<
       .parseAsync(req.query)
 
     if (!accessToken || !userId) {
-      console.log("pas connecté")
       const [challenges, totalPages] = await Promise.all([
         prisma.challenge.findMany({
           skip: (page - 1) * limit,
@@ -92,7 +91,6 @@ export default class ChallengeController extends BaseController<
       const nbPages = Math.ceil(totalPages / limit)
       return res.status(200).json({ challenges, nbPages })
     } else {
-      console.log("connecté")
       const [memberChallenges, challenges, totalFilteredPages] =
         await Promise.all([
           prisma.challenge.findMany({
