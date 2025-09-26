@@ -23,7 +23,7 @@ router.post(
 
 router.get(
   "/me",
-  verifyToken,
+  verifyToken({ ownerRequired: true }),
   cw((req, res) => authController.me(req, res))
 )
 

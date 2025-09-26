@@ -116,7 +116,6 @@ export default class AuthController extends BaseController<User, "user_id"> {
 
   async me(req: JwtRequest, res: Response) {
     const user = await this.findById(Number(req.user!.id))
-
     if (!user) {
       return res.status(404).json({ message: "Utilisateur introuvable" })
     }
