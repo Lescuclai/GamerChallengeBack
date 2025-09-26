@@ -89,7 +89,7 @@ export default class AuthController extends BaseController<User, "user_id"> {
       pseudo,
       email,
       password: hashedPassword,
-      avatar,
+      avatar: avatar.trim(),
     })
 
     const accessToken = generateAuthenticationTokens(user)
