@@ -2,6 +2,7 @@ import { Router } from "express"
 import authRoutes from "./routes/auth.routes.js"
 import challengeRoutes from "./routes/challenge.route.js"
 import entryRoutes from "./routes/entry.routes.js"
+import gameRoutes from "./routes/game.routes.js"
 import swaggerJSDoc from "swagger-jsdoc"
 import swaggerUi from "swagger-ui-express"
 import path from "node:path"
@@ -16,6 +17,7 @@ export const router = Router()
 router.use("/auth", authRoutes)
 router.use("/challenges", challengeRoutes)
 router.use("/entries", entryRoutes)
+router.use("/games", gameRoutes)
 
 const spec = swaggerJSDoc({
   definition: {

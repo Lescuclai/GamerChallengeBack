@@ -2,8 +2,8 @@ openapi: 3.0.4
 info:
   title: Swagger Gamer Challenges - OpenAPI 3.0
   description: |-
-    Our project Gamer Challenges is a student project to join gamer around the world to challenge in games playing. 
-    User are updating video games on show people our records gaming.
+    Our project Gamer Challenges is a student project to join gamers around the world to challenge each other in games. 
+    Users can post challenges, show game records, and compete.
   termsOfService: https://GamerChallenges.io/terms/
   contact:
     email: gamerChallenge@gmail.com
@@ -15,19 +15,16 @@ externalDocs:
   description: Find out more about Swagger
   url: https://swagger.io
 servers:
-  - url: https://localhost:5000/api/
+  - url: http://localhost:5000/api/
 
 tags:
   - name: auth
-    description: Access to account
-    externalDocs:
-      description: connect to database
-      url: https://swagger.io
+    description: Authentication & user access
+  - name: game
+    description: Manage and fetch available games
   - name: logout
     description: Disconnect from application
-    externalDocs:
-      description: Learn more about logout
-      url: https://swagger.io
+
 paths:
   /auth/register:
     post:
@@ -53,6 +50,7 @@ paths:
           description: Passwords do not match
         "409":
           description: Email already in use
+
   /auth/login:
     post:
       tags:
@@ -75,16 +73,18 @@ paths:
                 $ref: "#/components/schemas/LoginResponse"
         "401":
           description: Invalid credentials
+
   /auth/logout:
     post:
       tags:
-        - auth
+        - logout
       summary: Logout user
       description: Clear the access token cookie.
       operationId: logoutUser
       responses:
         "204":
           description: Successfully logged out
+
   /auth/me:
     get:
       tags:
@@ -103,6 +103,7 @@ paths:
                 $ref: "#/components/schemas/User"
         "404":
           description: User not found
+
   /auth/delete/{userId}:
     patch:
       tags:
@@ -123,12 +124,36 @@ paths:
           description: User soft-deleted
         "403":
           description: Forbidden - user not authorized
+
+  /games:
+    get:
+      tags:
+        - game
+      summary: Get all games
+      description: Retrieve all games that can be selected when creating a challenge.
+      operationId: getAllGames
+      responses:
+        "200":
+          description: A list of games
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Game"
+        "500":
+          description: Server error
+
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
   schemas:
     RegisterRequest:
       type: object
@@ -149,6 +174,7 @@ components:
         confirm:
           type: string
           format: password
+
     RegisterResponse:
       type: object
       properties:
@@ -156,6 +182,7 @@ components:
           type: string
         user:
           $ref: "#/components/schemas/User"
+
     LoginRequest:
       type: object
       required:
@@ -168,6 +195,7 @@ components:
         password:
           type: string
           format: password
+
     LoginResponse:
       type: object
       properties:
@@ -175,6 +203,7 @@ components:
           type: string
         user:
           $ref: "#/components/schemas/User"
+
     User:
       type: object
       properties:
@@ -187,7 +216,20 @@ components:
           format: email
         role:
           type: string
-          format: date-time
         updated_at:
           type: string
           format: date-time
+
+    Game:
+      type: object
+      properties:
+        game_id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "League of Legends"
+        image_url:
+          type: string
+          format: uri
+          example: "https://www.example.com/lol.jpg"
