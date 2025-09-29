@@ -9,10 +9,7 @@ import challengeRoutes from "./routes/challenge.route.js"
 import entryRoutes from "./routes/entry.routes.js"
 import gameRoutes from "./routes/game.routes.js"
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
 export const router = Router()
-
 //Routes
 router.use("/auth", authRoutes)
 router.use("/challenges", challengeRoutes)

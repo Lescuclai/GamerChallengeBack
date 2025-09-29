@@ -82,7 +82,7 @@ model Entry {
   user  User @relation(fields: [user_id], references: [user_id])
   user_id Int
   
-  challenge  Challenge @relation(fields: [challenge_id], references: [challenge_id])
+  challenge  Challenge @relation(fields: [challenge_id], references: [challenge_id], onDelete: Cascade)
   challenge_id Int
   
   entryVoters VoteUserEntry[]
@@ -99,7 +99,7 @@ model VoteUserChallenge {
   challenge_id Int
 
   user        User      @relation(fields: [user_id], references: [user_id])
-  challenge   Challenge @relation(fields: [challenge_id], references: [challenge_id])
+  challenge   Challenge @relation(fields: [challenge_id], references: [challenge_id], onDelete: Cascade)
 
   @@id([user_id, challenge_id])
   @@map("vote_user_challenge")
@@ -110,7 +110,7 @@ model VoteUserEntry {
   entry_id Int
 
   user        User      @relation(fields: [user_id], references: [user_id])
-  entry       Entry      @relation(fields: [entry_id], references: [entry_id])
+  entry       Entry      @relation(fields: [entry_id], references: [entry_id], onDelete: Cascade)
 
   @@id([user_id, entry_id])
   @@map("vote_user_entry")
