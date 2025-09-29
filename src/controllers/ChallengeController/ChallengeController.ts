@@ -155,4 +155,50 @@ export default class ChallengeController extends BaseController<
     }
     return res.status(200).json({ challenge })
   }
+  async updateChallenge(req: JwtRequest, res: Response) {
+    if (req.user) {
+      const { challengeId } = req.params
+      const { id: userId } = req.user
+      const challentToUpdate = await prisma.challenge.findUnique({
+        where: {
+          challenge_id: Number(challengeId),
+          user_id: userId,
+        },
+      })
+      if (!challentToUpdate) {
+        return res
+          .status(403)
+          .json({ message: "Non autorisé à modifier ce challenge" })
+      }
+      const response = await this.update(Number(challengeId), {
+        title: req.body.title,
+        description: req.body.deleted_user,
+        rules: req.body.rules,
+        game_id: req.body.game_id,
+      })
+
+      return res.json({ response })
+    }
+  }
+  async deleteChallenge(req: JwtRequest, res: Response) {
+    if (req.user) {
+      const { challengeId } = req.params
+      const { id } = req.user
+      const challentToDelete = await prisma.challenge.findUnique({
+        where: {
+          challenge_id: Number(challengeId),
+          user_id: id,
+        },
+      })
+      if (!challentToDelete) {
+        return res
+          .status(403)
+          .json({ message: "Non autorisé à supprimer ce challenge" })
+      }
+
+      await this.delete(challentToDelete.challenge_id)
+
+      res.status(200).json({ message: challentToDelete })
+    }
+  }
 }
