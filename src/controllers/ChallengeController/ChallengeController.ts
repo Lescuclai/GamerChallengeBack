@@ -1,11 +1,12 @@
 import { Challenge } from "@prisma/client"
 import { Request, Response } from "express"
 import z from "zod"
-import { JwtRequest } from "../../middlewares/authMiddleware.js"
-import { decodeJwt } from "../../utils/tokens.js"
 import { prisma } from "../../../prisma/index.js"
+import { JwtRequest } from "../../middlewares/authMiddleware.js"
 import { challengeSchema } from "../../schemas/challenge.schema.js"
+import { decodeJwt } from "../../utils/tokens.js"
 import BaseController from "../BaseController.js"
+
 export default class ChallengeController extends BaseController<
   Challenge,
   "challenge_id"
