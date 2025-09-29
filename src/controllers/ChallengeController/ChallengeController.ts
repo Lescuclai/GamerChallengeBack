@@ -254,4 +254,36 @@ export default class ChallengeController extends BaseController<
       res.status(200).json({ message: challentToDelete })
     }
   }
+
+  async toggleChallengeVote(req: JwtRequest, res: Response) {
+    const challengeId = parseInt(req.params.id)
+    const userId = req.user!.id
+
+    const challenge = await this.findById(challengeId)
+    if (!challenge) {
+      return res
+        .status(404)
+        .json({ error: `Aucun challenge trouvé avec l'id : ${challengeId}` })
+    }
+
+    const alreadyVoted = await prisma.voteUserChallenge.findUnique({
+      where: {
+        user_id_challenge_id: { user_id: userId, challenge_id: challengeId },
+      },
+    })
+
+    if (alreadyVoted) {
+      await prisma.voteUserChallenge.delete({
+        where: {
+          user_id_challenge_id: { user_id: userId, challenge_id: challengeId },
+        },
+      })
+      return res.status(200).json({ voted: false })
+    } else {
+      await prisma.voteUserChallenge.create({
+        data: { user_id: userId, challenge_id: challengeId },
+      })
+      return res.status(201).json({ voted: true })
+    }
+  }
 }
