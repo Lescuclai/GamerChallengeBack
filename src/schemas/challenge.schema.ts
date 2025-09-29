@@ -15,7 +15,6 @@ export const challengeSchema = z.object({
       message: "Les règles ne doivent pas contenir de balises <script>",
     }),
   game_title: z.string(),
-  userId: z.number(),
 })
 
 export type ChallengeInput = z.infer<typeof challengeSchema>
