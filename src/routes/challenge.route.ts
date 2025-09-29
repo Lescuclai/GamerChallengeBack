@@ -17,4 +17,8 @@ router.get(
   verifyToken({ ownerRequired: false }),
   cw((req, res) => challengeController.findAllWithPagination(req, res))
 )
+router.get(
+  "/:challengeId",
+  cw((req, res) => challengeController.findUniqueChallenge(req, res))
+)
 export default router
