@@ -3,8 +3,6 @@ import { prisma } from "../../../prisma/index.js"
 import { Request, Response } from "express"
 import { Entry } from "@prisma/client"
 import { JwtRequest } from "../../middlewares/authMiddleware.js"
-import getAuthenticatedUser from "../../utils/authenticatedUser.js"
-
 export default class EntryController extends BaseController<Entry, "entry_id"> {
   constructor() {
     super(prisma.entry, "entry_id")
@@ -37,7 +35,7 @@ export default class EntryController extends BaseController<Entry, "entry_id"> {
   }
 
   async findAllEntries(req: JwtRequest, res: Response) {
-    const userId = getAuthenticatedUser(req) || null
+    const userId = req.user?.id
     const { challengeId } = req.params
     if (!userId) {
       const entries = await prisma.challenge.findUnique({
