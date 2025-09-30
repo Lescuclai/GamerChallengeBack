@@ -4,8 +4,7 @@ import { prisma } from "../../../prisma/index.js"
 import { Request, Response } from "express"
 import z from "zod"
 import { JwtRequest } from "../../middlewares/authMiddleware.js"
-import { decodeJwt } from "../../utils/tokens.js"
-import getAuthenticatedUser from "../../utils/authenticatedUser.js"
+import { challengeSchema } from "../../schemas/challenge.schema.js"
 export default class ChallengeController extends BaseController<
   Challenge,
   "challenge_id"
@@ -65,65 +64,59 @@ export default class ChallengeController extends BaseController<
     return res.status(200).json({ data })
   }
   async findAllWithPagination(req: JwtRequest, res: Response) {
-    // const accessToken = req.cookies?.accessToken
-    // let userId: number | undefined = undefined
-    // if (accessToken) {
-    //   const user = decodeJwt(accessToken)
-    //   userId = user?.id
-    // }
-    const userId = getAuthenticatedUser(req) || null
-    const { page, limit } = await z
-      .object({
-        limit: z.coerce.number().int().min(1).optional().default(5),
-        page: z.coerce.number().int().min(1).optional().default(1),
-      })
-      .parseAsync(req.query)
-
-    if (!userId) {
-      const [challenges, totalPages] = await Promise.all([
-        prisma.challenge.findMany({
-          skip: (page - 1) * limit,
-          take: limit,
-          include: {
-            game: true,
-          },
-        }),
-        prisma.challenge.count(),
-      ])
-      const nbPages = Math.ceil(totalPages / limit)
-      return res.status(200).json({ challenges, nbPages })
-    } else {
-      const [memberChallenges, challenges, totalFilteredPages] =
-        await Promise.all([
-          prisma.challenge.findMany({
-            where: { user_id: userId },
-            include: {
-              game: true,
-            },
-          }),
+    if (req.user) {
+      const { id: userId } = req.user
+      const { page, limit } = await z
+        .object({
+          limit: z.coerce.number().int().min(1).optional().default(5),
+          page: z.coerce.number().int().min(1).optional().default(1),
+        })
+        .parseAsync(req.query)
+      if (!userId) {
+        const [challenges, totalPages] = await Promise.all([
           prisma.challenge.findMany({
             skip: (page - 1) * limit,
             take: limit,
-            where: {
-              user_id: {
-                not: userId,
-              },
-            },
             include: {
               game: true,
             },
           }),
-          prisma.challenge.count({
-            where: {
-              user_id: {
-                not: userId,
-              },
-            },
-          }),
+          prisma.challenge.count(),
         ])
-
-      const nbPages = Math.ceil(totalFilteredPages / limit)
-      return res.status(200).json({ memberChallenges, challenges, nbPages })
+        const nbPages = Math.ceil(totalPages / limit)
+        return res.status(200).json({ challenges, nbPages })
+      } else {
+        const [memberChallenges, challenges, totalFilteredPages] =
+          await Promise.all([
+            prisma.challenge.findMany({
+              where: { user_id: userId },
+              include: {
+                game: true,
+              },
+            }),
+            prisma.challenge.findMany({
+              skip: (page - 1) * limit,
+              take: limit,
+              where: {
+                user_id: {
+                  not: userId,
+                },
+              },
+              include: {
+                game: true,
+              },
+            }),
+            prisma.challenge.count({
+              where: {
+                user_id: {
+                  not: userId,
+                },
+              },
+            }),
+          ])
+        const nbPages = Math.ceil(totalFilteredPages / limit)
+        return res.status(200).json({ memberChallenges, challenges, nbPages })
+      }
     }
   }
   async findUniqueChallenge(req: Request, res: Response) {
@@ -154,5 +147,56 @@ export default class ChallengeController extends BaseController<
       return res.status(404).json({ message: "Challenge not found" })
     }
     return res.status(200).json({ challenge })
+  }
+  async updateChallenge(req: JwtRequest, res: Response) {
+    if (req.user) {
+      const { challengeId } = req.params
+      const { id: userId } = req.user
+      const challentToUpdate = await prisma.challenge.findUnique({
+        where: {
+          challenge_id: Number(challengeId),
+          user_id: userId,
+        },
+      })
+      if (!challentToUpdate) {
+        return res
+          .status(403)
+          .json({ message: "Non autorisé à modifier ce challenge" })
+      }
+      const validateChallenge = challengeSchema.safeParse(req.body)
+      if (!validateChallenge.success) {
+        return res.status(400).json({
+          message: "Données invalides",
+          errors: validateChallenge.error,
+        })
+      }
+      const { title, description, rules, game_id } = validateChallenge.data
+      const response = await this.update(Number(challengeId), {
+        title,
+        description,
+        rules,
+        game_id,
+      })
+      return res.json({ response })
+    }
+  }
+  async deleteChallenge(req: JwtRequest, res: Response) {
+    if (req.user) {
+      const { challengeId } = req.params
+      const { id } = req.user
+      const challentToDelete = await prisma.challenge.findUnique({
+        where: {
+          challenge_id: Number(challengeId),
+          user_id: id,
+        },
+      })
+      if (!challentToDelete) {
+        return res
+          .status(403)
+          .json({ message: "Non autorisé à supprimer ce challenge" })
+      }
+      await this.delete(challentToDelete.challenge_id)
+      res.status(200).json({ message: challentToDelete })
+    }
   }
 }

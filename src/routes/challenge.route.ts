@@ -21,4 +21,15 @@ router.get(
   "/:challengeId",
   cw((req, res) => challengeController.findUniqueChallenge(req, res))
 )
+router.patch(
+  "/:challengeId",
+  verifyToken({ ownerRequired: true }),
+  cw((req, res) => challengeController.updateChallenge(req, res))
+)
+router.delete(
+  "/:challengeId",
+  verifyToken({ ownerRequired: true }),
+  cw((req, res) => challengeController.deleteChallenge(req, res))
+)
+
 export default router
