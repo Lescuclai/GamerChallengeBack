@@ -3,6 +3,8 @@ import authRoutes from "./routes/auth.routes.js"
 import challengeRoutes from "./routes/challenge.route.js"
 import entryRoutes from "./routes/entry.routes.js"
 import gameRoutes from "./routes/game.routes.js"
+import swaggerJSDoc from "swagger-jsdoc"
+import swaggerUi from "swagger-ui-express"
 
 export const router = Router()
 //Routes
@@ -11,7 +13,6 @@ router.use("/challenges", challengeRoutes)
 router.use("/entries", entryRoutes)
 router.use("/games", gameRoutes)
 
-<<<<<<< HEAD
 const spec = swaggerJSDoc({
   definition: {
     openapi: "3.0.0",
@@ -25,43 +26,12 @@ const spec = swaggerJSDoc({
         description: "Development server",
       },
     ],
-    components: {
-      schemas: {
-        Challenge: {
-          type: "object",
-          properties: {
-            id: {
-              type: "integer",
-              description: "ID unique du défi",
-            },
-            title: {
-              type: "string",
-              description: "Titre du défi",
-            },
-            rules: {
-              type: "string",
-              desciption: "Regles du défi",
-            },
-            description: {
-              type: "string",
-              description: "Description du défi",
-            },
-            createdAt: {
-              type: "string",
-              format: "date-time",
-              description: "Date de création",
-            },
-          },
-        },
-      },
-    },
   },
-  apis: [path.join(__dirname, "../src/docs/openapi.yml")],
+  apis: ["./src/docs/openapi.yml"],
 })
 
 router.use("/docs", swaggerUi.serve, swaggerUi.setup(spec))
-=======
->>>>>>> f9a5083 (fix: hotfix to fix challenge list not working)
+
 //Default 404
 router.use((req, res) => {
   res.status(404).json({ error: "Not found" })
