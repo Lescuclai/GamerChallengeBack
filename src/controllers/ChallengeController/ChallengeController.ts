@@ -6,7 +6,7 @@ import { JwtRequest } from "../../middlewares/authMiddleware.js"
 import { challengeSchema } from "../../schemas/challenge.schema.js"
 import { decodeJwt } from "../../utils/tokens.js"
 import BaseController from "../BaseController.js"
-
+import getAuthenticatedUser from "../../utils/authenticatedUser.js"
 export default class ChallengeController extends BaseController<
   Challenge,
   "challenge_id"
@@ -67,12 +67,13 @@ export default class ChallengeController extends BaseController<
     return res.status(200).json({ data })
   }
   async findAllWithPagination(req: JwtRequest, res: Response) {
-    const accessToken = req.cookies?.accessToken
-    let userId: number | undefined = undefined
-    if (accessToken) {
-      const user = decodeJwt(accessToken)
-      userId = user?.id
-    }
+    // const accessToken = req.cookies?.accessToken
+    // let userId: number | undefined = undefined
+    // if (accessToken) {
+    //   const user = decodeJwt(accessToken)
+    //   userId = user?.id
+    // }
+    const userId = getAuthenticatedUser(req) || null
     const { page, limit } = await z
       .object({
         limit: z.coerce.number().int().min(1).optional().default(5),
@@ -80,7 +81,7 @@ export default class ChallengeController extends BaseController<
       })
       .parseAsync(req.query)
 
-    if (!accessToken || !userId) {
+    if (!userId) {
       const [challenges, totalPages] = await Promise.all([
         prisma.challenge.findMany({
           skip: (page - 1) * limit,
