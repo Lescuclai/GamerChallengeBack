@@ -1,10 +1,13 @@
 import { Challenge } from "@prisma/client"
-import BaseController from "../BaseController.js"
-import { prisma } from "../../../prisma/index.js"
 import { Request, Response } from "express"
 import z from "zod"
+import { prisma } from "../../../prisma/index.js"
 import { JwtRequest } from "../../middlewares/authMiddleware.js"
 import { challengeSchema } from "../../schemas/challenge.schema.js"
+import { decodeJwt } from "../../utils/tokens.js"
+import BaseController from "../BaseController.js"
+import getAuthenticatedUser from "../../utils/authenticatedUser.js"
+
 export default class ChallengeController extends BaseController<
   Challenge,
   "challenge_id"
@@ -12,6 +15,7 @@ export default class ChallengeController extends BaseController<
   constructor() {
     super(prisma.challenge, "challenge_id")
   }
+
   async newestChallenges(req: Request, res: Response) {
     const data = await prisma.challenge.findMany({
       select: {
@@ -148,6 +152,50 @@ export default class ChallengeController extends BaseController<
     }
     return res.status(200).json({ challenge })
   }
+
+  //Challenge
+  async createChallenge(req: JwtRequest, res: Response) {
+    const result = challengeSchema.safeParse(req.body)
+    console.log("Body reçu:", req.body)
+    console.log("User ID from JWT:", req.user!.id)
+    if (!result.success) {
+      return res.status(400).json({
+        error: "Validation échouée",
+        details: result.error.issues,
+      })
+    }
+    try {
+      const { title, description, rules, game_title } = result.data
+      const game = await prisma.game.findUnique({
+        where: { title: game_title },
+      })
+
+      if (!req.user || !req.user.id) {
+        return res.status(401).json({ error: "Utilisateur non authentifié" })
+      }
+
+      if (!game) {
+        return res.status(404).json({ error: "Jeu non trouvé" })
+      }
+
+      const newChallenge = await this.create({
+        title,
+        description,
+        rules,
+        game_id: game.game_id,
+        user_id: req.user.id,
+      })
+      return res.status(201).json({
+        message: "Challenge créé",
+        challenge: newChallenge,
+      })
+    } catch (err: unknown) {
+      console.error(err)
+      return res.status(500).json({
+        error: "Erreur serveur",
+        details: err instanceof Error ? err.message : "Erreur inconnue",
+      })
+
   async updateChallenge(req: JwtRequest, res: Response) {
     if (req.user) {
       const { challengeId } = req.params
@@ -197,6 +245,7 @@ export default class ChallengeController extends BaseController<
       }
       await this.delete(challentToDelete.challenge_id)
       res.status(200).json({ message: challentToDelete })
+
     }
   }
 }

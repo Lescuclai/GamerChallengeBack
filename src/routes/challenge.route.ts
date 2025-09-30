@@ -1,7 +1,7 @@
 import { Router } from "express"
 import ChallengeController from "../controllers/ChallengeController/ChallengeController.js"
-import { controllerWrapper as cw } from "../utils/controllerWrapper.js"
 import { verifyToken } from "../middlewares/authMiddleware.js"
+import { controllerWrapper as cw } from "../utils/controllerWrapper.js"
 const router = Router()
 const challengeController = new ChallengeController()
 router.get(
@@ -17,10 +17,18 @@ router.get(
   verifyToken({ ownerRequired: false }),
   cw((req, res) => challengeController.findAllWithPagination(req, res))
 )
+
+router.post(
+  "/",
+  verifyToken({ ownerRequired: true }),
+  cw((req, res) => challengeController.createChallenge(req, res))
+)
+
 router.get(
   "/:challengeId",
   cw((req, res) => challengeController.findUniqueChallenge(req, res))
 )
+
 router.patch(
   "/:challengeId",
   verifyToken({ ownerRequired: true }),
@@ -31,5 +39,6 @@ router.delete(
   verifyToken({ ownerRequired: true }),
   cw((req, res) => challengeController.deleteChallenge(req, res))
 )
+
 
 export default router
