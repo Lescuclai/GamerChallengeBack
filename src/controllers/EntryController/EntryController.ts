@@ -3,6 +3,7 @@ import { prisma } from "../../../prisma/index.js"
 import { Request, Response } from "express"
 import { Entry } from "@prisma/client"
 import { JwtRequest } from "../../middlewares/authMiddleware.js"
+import z from "zod"
 export default class EntryController extends BaseController<Entry, "entry_id"> {
   constructor() {
     super(prisma.entry, "entry_id")
@@ -89,5 +90,31 @@ export default class EntryController extends BaseController<Entry, "entry_id"> {
       ])
       return res.status(200).json({ memberEntries, entries })
     }
+  }
+  async postEntry(req: JwtRequest, res: Response) {
+    const userId = req.user?.id
+    const { challengeId } = req.params
+    const { title, video_url } = await z
+      .object({
+        title: z
+          .string()
+          .max(5)
+          .refine((val) => !/<script.*?>.*?<\/script>/i.test(val)),
+        video_url: z
+          .url()
+          .refine((val) => !/<script.*?>.*?<\/script>/i.test(val)),
+      })
+      .parseAsync(req.body)
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" })
+    }
+    this.create({
+      title,
+      video_url,
+      user_id: userId,
+      challenge_id: Number(challengeId),
+    })
+      .then((entry) => res.status(201).json({ entry }))
+      .catch((error) => res.status(500).json({ message: error.message }))
   }
 }
