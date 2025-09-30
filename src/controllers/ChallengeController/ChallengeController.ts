@@ -164,8 +164,6 @@ export default class ChallengeController extends BaseController<
   //Challenge
   async createChallenge(req: JwtRequest, res: Response) {
     const result = challengeSchema.safeParse(req.body)
-    console.log("Body reçu:", req.body)
-    console.log("User ID from JWT:", req.user!.id)
     if (!result.success) {
       return res.status(400).json({
         error: "Validation échouée",
@@ -177,15 +175,12 @@ export default class ChallengeController extends BaseController<
       const game = await prisma.game.findUnique({
         where: { title: game_title },
       })
-
       if (!req.user || !req.user.id) {
         return res.status(401).json({ error: "Utilisateur non authentifié" })
       }
-
       if (!game) {
         return res.status(404).json({ error: "Jeu non trouvé" })
       }
-
       const newChallenge = await this.create({
         title,
         description,
