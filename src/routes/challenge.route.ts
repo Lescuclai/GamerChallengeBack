@@ -24,6 +24,7 @@ router.get(
 )
 router.get(
   "/:challengeId",
+  verifyToken({ ownerRequired: false }),
   cw((req, res) => challengeController.findUniqueChallenge(req, res))
 )
 router.patch(
