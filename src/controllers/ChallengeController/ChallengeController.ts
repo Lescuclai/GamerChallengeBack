@@ -119,7 +119,7 @@ export default class ChallengeController extends BaseController<
       }
     }
   }
-  async findUniqueChallenge(req: Request, res: Response) {
+  async findUniqueChallenge(req: JwtRequest, res: Response) {
     const { challengeId } = req.params
     const challenge = await prisma.challenge.findUnique({
       where: { challenge_id: Number(challengeId) },
@@ -146,7 +146,20 @@ export default class ChallengeController extends BaseController<
     if (!challenge) {
       return res.status(404).json({ message: "Challenge not found" })
     }
-    return res.status(200).json({ challenge })
+
+    let userHasVoted = false
+    if (req.user && req.user.id) {
+      const findVote = await prisma.voteUserChallenge.findUnique({
+        where: {
+          user_id_challenge_id: {
+            user_id: req.user!.id,
+            challenge_id: Number(challengeId),
+          },
+        },
+      })
+      userHasVoted = !!findVote
+    }
+    return res.status(200).json({ ...challenge, userHasVoted })
   }
   async updateChallenge(req: JwtRequest, res: Response) {
     if (req.user) {
@@ -203,20 +216,17 @@ export default class ChallengeController extends BaseController<
   async toggleChallengeVote(req: JwtRequest, res: Response) {
     const challengeId = parseInt(req.params.id)
     const userId = req.user!.id
-
     const challenge = await this.findById(challengeId)
     if (!challenge) {
       return res
         .status(404)
         .json({ error: `Aucun challenge trouvé avec l'id : ${challengeId}` })
     }
-
     const alreadyVoted = await prisma.voteUserChallenge.findUnique({
       where: {
         user_id_challenge_id: { user_id: userId, challenge_id: challengeId },
       },
     })
-
     if (alreadyVoted) {
       await prisma.voteUserChallenge.delete({
         where: {
