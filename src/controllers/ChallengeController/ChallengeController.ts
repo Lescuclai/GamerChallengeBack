@@ -64,59 +64,57 @@ export default class ChallengeController extends BaseController<
     return res.status(200).json({ data })
   }
   async findAllWithPagination(req: JwtRequest, res: Response) {
-    if (req.user) {
-      const { id: userId } = req.user
-      const { page, limit } = await z
-        .object({
-          limit: z.coerce.number().int().min(1).optional().default(5),
-          page: z.coerce.number().int().min(1).optional().default(1),
-        })
-        .parseAsync(req.query)
-      if (!userId) {
-        const [challenges, totalPages] = await Promise.all([
+    const userId = req.user?.id
+    const { page, limit } = await z
+      .object({
+        limit: z.coerce.number().int().min(1).optional().default(5),
+        page: z.coerce.number().int().min(1).optional().default(1),
+      })
+      .parseAsync(req.query)
+    if (!userId) {
+      const [challenges, totalPages] = await Promise.all([
+        prisma.challenge.findMany({
+          skip: (page - 1) * limit,
+          take: limit,
+          include: {
+            game: true,
+          },
+        }),
+        prisma.challenge.count(),
+      ])
+      const nbPages = Math.ceil(totalPages / limit)
+      return res.status(200).json({ challenges, nbPages })
+    } else {
+      const [memberChallenges, challenges, totalFilteredPages] =
+        await Promise.all([
           prisma.challenge.findMany({
-            skip: (page - 1) * limit,
-            take: limit,
+            where: { user_id: userId },
             include: {
               game: true,
             },
           }),
-          prisma.challenge.count(),
+          prisma.challenge.findMany({
+            skip: (page - 1) * limit,
+            take: limit,
+            where: {
+              user_id: {
+                not: userId,
+              },
+            },
+            include: {
+              game: true,
+            },
+          }),
+          prisma.challenge.count({
+            where: {
+              user_id: {
+                not: userId,
+              },
+            },
+          }),
         ])
-        const nbPages = Math.ceil(totalPages / limit)
-        return res.status(200).json({ challenges, nbPages })
-      } else {
-        const [memberChallenges, challenges, totalFilteredPages] =
-          await Promise.all([
-            prisma.challenge.findMany({
-              where: { user_id: userId },
-              include: {
-                game: true,
-              },
-            }),
-            prisma.challenge.findMany({
-              skip: (page - 1) * limit,
-              take: limit,
-              where: {
-                user_id: {
-                  not: userId,
-                },
-              },
-              include: {
-                game: true,
-              },
-            }),
-            prisma.challenge.count({
-              where: {
-                user_id: {
-                  not: userId,
-                },
-              },
-            }),
-          ])
-        const nbPages = Math.ceil(totalFilteredPages / limit)
-        return res.status(200).json({ memberChallenges, challenges, nbPages })
-      }
+      const nbPages = Math.ceil(totalFilteredPages / limit)
+      return res.status(200).json({ memberChallenges, challenges, nbPages })
     }
   }
   async findUniqueChallenge(req: Request, res: Response) {
