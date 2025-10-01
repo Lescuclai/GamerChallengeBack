@@ -3,6 +3,8 @@ import { prisma } from "../../../prisma/index.js"
 import { Request, Response } from "express"
 import { Entry } from "@prisma/client"
 import { JwtRequest } from "../../middlewares/authMiddleware.js"
+import { entrySchema } from "../../schemas/entry.schema.js"
+
 export default class EntryController extends BaseController<Entry, "entry_id"> {
   constructor() {
     super(prisma.entry, "entry_id")
@@ -89,5 +91,16 @@ export default class EntryController extends BaseController<Entry, "entry_id"> {
       ])
       return res.status(200).json({ memberEntries, entries })
     }
+  }
+  async postEntry(req: JwtRequest, res: Response) {
+    const userId = req.user!.id
+    const { challengeId } = req.params
+    const { title, video_url } = await entrySchema.parseAsync(req.body)
+    this.create({
+      title,
+      video_url,
+      user_id: userId,
+      challenge_id: Number(challengeId),
+    }).then((entry) => res.status(201).json({ entry }))
   }
 }
