@@ -164,8 +164,6 @@ export default class ChallengeController extends BaseController<
   //Challenge
   async createChallenge(req: JwtRequest, res: Response) {
     const result = challengeSchema.safeParse(req.body)
-    console.log("Body reçu:", req.body)
-    console.log("User ID from JWT:", req.user!.id)
     if (!result.success) {
       return res.status(400).json({
         error: "Validation échouée",
