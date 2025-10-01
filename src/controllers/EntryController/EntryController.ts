@@ -38,6 +38,7 @@ export default class EntryController extends BaseController<Entry, "entry_id"> {
 
   async findAllEntries(req: JwtRequest, res: Response) {
     const userId = req.user?.id
+    console.log(userId)
     const { challengeId } = req.params
     if (!userId) {
       const entries = await prisma.challenge.findUnique({
@@ -71,7 +72,17 @@ export default class EntryController extends BaseController<Entry, "entry_id"> {
           where: {
             AND: [{ challenge_id: Number(challengeId) }, { user_id: userId }],
           },
-          include: { user: true },
+          include: {
+            user: {
+              select: {
+                pseudo: true,
+                avatar: true,
+              },
+            },
+            entryVoters: {
+              where: { user_id: userId },
+            },
+          },
           orderBy: {
             created_at: "desc",
           },
@@ -83,13 +94,36 @@ export default class EntryController extends BaseController<Entry, "entry_id"> {
               { user_id: { not: userId } },
             ],
           },
-          include: { user: true },
+          include: {
+            user: {
+              select: {
+                pseudo: true,
+                avatar: true,
+              },
+            },
+            entryVoters: {
+              where: { user_id: userId },
+            },
+          },
           orderBy: {
             created_at: "desc",
           },
         }),
       ])
-      return res.status(200).json({ memberEntries, entries })
+      const memberEntriesWithVote = memberEntries.map(
+        ({ entryVoters, ...entry }) => ({
+          ...entry,
+          userHasVoted: entryVoters.length > 0,
+        })
+      )
+      const entriesWithVote = entries.map(({ entryVoters, ...entry }) => ({
+        ...entry,
+        userHasVoted: entryVoters.length > 0,
+      }))
+      return res.status(200).json({
+        memberEntries: memberEntriesWithVote,
+        entries: entriesWithVote,
+      })
     }
   }
   async postEntry(req: JwtRequest, res: Response) {
