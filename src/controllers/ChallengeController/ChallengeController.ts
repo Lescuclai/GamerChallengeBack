@@ -138,6 +138,7 @@ export default class ChallengeController extends BaseController<
         },
         user: {
           select: {
+            user_id: true,
             pseudo: true,
             avatar: true,
           },
@@ -159,7 +160,15 @@ export default class ChallengeController extends BaseController<
       })
       userHasVoted = !!findVote
     }
-    return res.status(200).json({ ...challenge, userHasVoted })
+    return res.status(200).json({
+      ...challenge,
+      user: {
+        id: challenge.user.user_id,
+        pseudo: challenge.user.pseudo,
+        avatar: challenge.user.avatar,
+      },
+      userHasVoted,
+    })
   }
 
   //Challenge
