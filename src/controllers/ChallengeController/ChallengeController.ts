@@ -4,9 +4,7 @@ import z from "zod"
 import { prisma } from "../../../prisma/index.js"
 import { JwtRequest } from "../../middlewares/authMiddleware.js"
 import { challengeSchema } from "../../schemas/challenge.schema.js"
-import { decodeJwt } from "../../utils/tokens.js"
 import BaseController from "../BaseController.js"
-import getAuthenticatedUser from "../../utils/authenticatedUser.js"
 
 export default class ChallengeController extends BaseController<
   Challenge,
@@ -207,6 +205,8 @@ export default class ChallengeController extends BaseController<
         error: "Erreur serveur",
         details: err instanceof Error ? err.message : "Erreur inconnue",
       })
+    }
+  }
 
   async updateChallenge(req: JwtRequest, res: Response) {
     if (req.user) {
@@ -240,6 +240,7 @@ export default class ChallengeController extends BaseController<
       return res.json({ response })
     }
   }
+
   async deleteChallenge(req: JwtRequest, res: Response) {
     if (req.user) {
       const { challengeId } = req.params
@@ -257,7 +258,6 @@ export default class ChallengeController extends BaseController<
       }
       await this.delete(challentToDelete.challenge_id)
       res.status(200).json({ message: challentToDelete })
-
     }
   }
 
