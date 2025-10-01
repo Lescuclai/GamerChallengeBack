@@ -11,6 +11,7 @@ router.get(
 )
 router.get(
   "/:challengeId",
+  verifyToken({ ownerRequired: false }),
   cw((req, res) => entryController.findAllEntries(req, res))
 )
 router.post(
