@@ -1,4 +1,6 @@
 import { Router } from "express"
+import swaggerJSDoc from "swagger-jsdoc"
+import swaggerUi from "swagger-ui-express"
 import authRoutes from "./routes/auth.routes.js"
 import challengeRoutes from "./routes/challenge.route.js"
 import entryRoutes from "./routes/entry.routes.js"
@@ -7,6 +9,7 @@ import swaggerJSDoc from "swagger-jsdoc"
 import swaggerUi from "swagger-ui-express"
 
 export const router = Router()
+
 //Routes
 router.use("/auth", authRoutes)
 router.use("/challenges", challengeRoutes)
