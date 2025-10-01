@@ -46,5 +46,4 @@ router.delete(
   cw((req, res) => challengeController.deleteChallenge(req, res))
 )
 
-
 export default router
