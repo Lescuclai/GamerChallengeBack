@@ -12,6 +12,11 @@ router.get(
   "/most-liked",
   cw((req, res) => challengeController.mostLikedChallenges(req, res))
 )
+router.post(
+  "/:id/vote",
+  verifyToken({ ownerRequired: true }),
+  cw((req, res) => challengeController.toggleChallengeVote(req, res))
+)
 router.get(
   "/",
   verifyToken({ ownerRequired: false }),
@@ -26,6 +31,7 @@ router.post(
 
 router.get(
   "/:challengeId",
+  verifyToken({ ownerRequired: false }),
   cw((req, res) => challengeController.findUniqueChallenge(req, res))
 )
 
