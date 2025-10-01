@@ -2,18 +2,11 @@ import { Challenge } from "@prisma/client"
 import { Request, Response } from "express"
 import z from "zod"
 import { JwtRequest } from "../../middlewares/authMiddleware.js"
-<<<<<<< HEAD
-<<<<<<< HEAD
 import { decodeJwt } from "../../utils/tokens.js"
 import { prisma } from "../../../prisma/index.js"
-=======
->>>>>>> f8b722c ("fix: correction bracket + schema")
 import { challengeSchema } from "../../schemas/challenge.schema.js"
 import BaseController from "../BaseController.js"
 
-=======
-import { challengeSchema } from "../../schemas/challenge.schema.js"
->>>>>>> f2707a8 (fix: fixing zod validation and verifytoken controller)
 export default class ChallengeController extends BaseController<
   Challenge,
   "challenge_id"

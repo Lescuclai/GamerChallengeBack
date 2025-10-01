@@ -1,9 +1,4 @@
 import { Router } from "express"
-import path from "node:path"
-import { dirname } from "path"
-import swaggerJSDoc from "swagger-jsdoc"
-import swaggerUi from "swagger-ui-express"
-import { fileURLToPath } from "url"
 import authRoutes from "./routes/auth.routes.js"
 import challengeRoutes from "./routes/challenge.route.js"
 import entryRoutes from "./routes/entry.routes.js"
@@ -16,6 +11,7 @@ router.use("/challenges", challengeRoutes)
 router.use("/entries", entryRoutes)
 router.use("/games", gameRoutes)
 
+<<<<<<< HEAD
 const spec = swaggerJSDoc({
   definition: {
     openapi: "3.0.0",
@@ -64,6 +60,8 @@ const spec = swaggerJSDoc({
 })
 
 router.use("/docs", swaggerUi.serve, swaggerUi.setup(spec))
+=======
+>>>>>>> f9a5083 (fix: hotfix to fix challenge list not working)
 //Default 404
 router.use((req, res) => {
   res.status(404).json({ error: "Not found" })
