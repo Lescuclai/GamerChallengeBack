@@ -14,35 +14,35 @@ router.get(
 )
 router.post(
   "/:id/vote",
-  verifyToken({ ownerRequired: true }),
+  verifyToken({ validityRequired: true }),
   cw((req, res) => challengeController.toggleChallengeVote(req, res))
 )
 router.get(
   "/",
-  verifyToken({ ownerRequired: false }),
+  verifyToken({ validityRequired: false }),
   cw((req, res) => challengeController.findAllWithPagination(req, res))
 )
 
 router.post(
   "/",
-  verifyToken({ ownerRequired: true }),
+  verifyToken({ validityRequired: true }),
   cw((req, res) => challengeController.createChallenge(req, res))
 )
 
 router.get(
   "/:challengeId",
-  verifyToken({ ownerRequired: false }),
+  verifyToken({ validityRequired: false }),
   cw((req, res) => challengeController.findUniqueChallenge(req, res))
 )
 
 router.patch(
   "/:challengeId",
-  verifyToken({ ownerRequired: true }),
+  verifyToken({ validityRequired: true }),
   cw((req, res) => challengeController.updateChallenge(req, res))
 )
 router.delete(
   "/:challengeId",
-  verifyToken({ ownerRequired: true }),
+  verifyToken({ validityRequired: true }),
   cw((req, res) => challengeController.deleteChallenge(req, res))
 )
 
