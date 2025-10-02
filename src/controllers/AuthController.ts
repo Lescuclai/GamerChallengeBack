@@ -154,6 +154,7 @@ export default class AuthController extends BaseController<User, "user_id"> {
     }
 
     const accessToken = generateAccessTokenOnly(existingRefreshToken.user)
+    setAccessTokenCookie(res, accessToken)
 
     res.status(200).json({ accessToken })
   }
@@ -219,7 +220,7 @@ function setRefreshTokenCookie(res: Response, refreshToken: Token) {
     maxAge: refreshToken.expiresInMS,
     secure: config.server.secure,
     sameSite: "lax",
-    path: "/api/auth/refresh",
+    path: "/api/auth/",
   })
 }
 
@@ -239,6 +240,6 @@ async function deleteTokenAndCookies(req: Request, res: Response) {
     httpOnly: true,
     secure: config.server.secure,
     sameSite: "lax",
-    path: "/api/auth/refresh",
+    path: "/api/auth/",
   })
 }
