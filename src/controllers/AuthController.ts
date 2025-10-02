@@ -36,10 +36,7 @@ export default class AuthController extends BaseController<User, "user_id"> {
       })
     }
 
-    // TODO : Add refresh tokens
-
-    const accessToken = generateAuthenticationTokens(user)
-    setAccessTokenCookie(res, accessToken)
+    await generateAndSetTokens(res, user)
 
     return res.status(200).json({
       message: "Connecté avec succès",
@@ -92,8 +89,7 @@ export default class AuthController extends BaseController<User, "user_id"> {
       avatar: avatar.trim(),
     })
 
-    const accessToken = generateAuthenticationTokens(user)
-    setAccessTokenCookie(res, accessToken)
+    await generateAndSetTokens(res, user)
 
     res.status(201).json({
       message: "Utilisateur créé avec succès",
@@ -154,12 +150,42 @@ export default class AuthController extends BaseController<User, "user_id"> {
   }
 }
 
+async function generateAndSetTokens(res: Response, user: User) {
+  const { accessToken, refreshToken } = generateAuthenticationTokens(user)
+
+  await replaceRefreshTokenInDatabase(refreshToken, user)
+
+  setAccessTokenCookie(res, accessToken)
+  setRefreshTokenCookie(res, refreshToken)
+}
+
+async function replaceRefreshTokenInDatabase(refreshToken: Token, user: User) {
+  await prisma.refreshToken.deleteMany({ where: { user_id: user.user_id } })
+  await prisma.refreshToken.create({
+    data: {
+      token: refreshToken.token,
+      user_id: user.user_id,
+      issued_at: new Date(),
+      expired_at: new Date(new Date().valueOf() + refreshToken.expiresInMS),
+    },
+  })
+}
+
 function setAccessTokenCookie(res: Response, accessToken: Token) {
   // Maybe add sameSite: "strict"
   res.cookie("accessToken", accessToken.token, {
     httpOnly: true,
     maxAge: accessToken.expiresInMS,
     secure: config.server.secure,
+  })
+}
+
+function setRefreshTokenCookie(res: Response, refreshToken: Token) {
+  res.cookie("refreshToken", refreshToken.token, {
+    httpOnly: true,
+    maxAge: refreshToken.expiresInMS,
+    secure: config.server.secure,
+    path: "/api/auth/refresh",
   })
 }
 

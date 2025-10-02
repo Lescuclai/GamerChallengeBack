@@ -24,6 +24,8 @@ model User {
   challenges Challenge[]
   entries Entry[]
 
+  refresh_tokens RefreshToken[]
+
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
   deleted_at DateTime?
@@ -32,6 +34,20 @@ model User {
   entryVotes VoteUserEntry[]
 
   @@map("user")
+}
+
+model RefreshToken {
+  id Int @id @default(autoincrement())
+
+  token String
+
+  user    User @relation(fields: [user_id], references: [user_id]) // Alias
+  user_id Int
+
+  issued_at  DateTime @default(now())
+  expired_at DateTime
+
+  @@map("refresh_token")
 }
 
 model Game {

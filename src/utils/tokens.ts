@@ -1,3 +1,4 @@
+import crypto from "node:crypto"
 import jwt from "jsonwebtoken"
 import { User } from "@prisma/client"
 import { config } from "../../config.js"
@@ -25,10 +26,19 @@ export function generateAuthenticationTokens(user: User) {
     expiresIn: "1h",
   })
 
+  const refreshToken = crypto.randomBytes(128).toString("base64")
+
   return {
-    token: accessToken,
-    type: "Bearer",
-    expiresInMS: 1 * 60 * 60 * 1000, // 1h
+    accessToken: {
+      token: accessToken,
+      type: "Bearer",
+      expiresInMS: 1 * 60 * 60 * 1000, // 1h
+    },
+    refreshToken: {
+      token: refreshToken,
+      type: "Bearer",
+      expiresInMS: 7 * 24 * 60 * 60 * 1000, // 7j
+    },
   }
 }
 
