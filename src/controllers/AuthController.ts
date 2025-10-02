@@ -3,7 +3,10 @@ import type { Request, Response } from "express"
 import { prisma } from "../../prisma/index.js"
 import { User } from "@prisma/client"
 import { registerSchema, loginSchema } from "../schemas/auth.schema.js"
-import { generateAuthenticationTokens } from "../utils/tokens.js"
+import {
+  generateAccessTokenOnly,
+  generateAuthenticationTokens,
+} from "../utils/tokens.js"
 import { JwtRequest } from "../middlewares/authMiddleware.js"
 import { config } from "../../config.js"
 import argon2 from "argon2"
@@ -150,10 +153,7 @@ export default class AuthController extends BaseController<User, "user_id"> {
       return res.status(401).json({ message: "Refresh Token expiré" })
     }
 
-    const accessToken = await generateAndSetTokens(
-      res,
-      existingRefreshToken.user
-    )
+    const accessToken = generateAccessTokenOnly(existingRefreshToken.user)
 
     res.status(200).json({ accessToken })
   }
