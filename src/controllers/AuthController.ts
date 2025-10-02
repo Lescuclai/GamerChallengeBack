@@ -127,6 +127,32 @@ export default class AuthController extends BaseController<User, "user_id"> {
     })
   }
 
+  async refreshAccessToken(req: Request, res: Response) {
+    const rawToken = req.cookies?.refreshToken || req.body?.refreshToken
+    if (!rawToken) {
+      return res.status(401).json({ message: "Refresh Token non reçu" })
+    }
+
+    const existingRefreshToken = await prisma.refreshToken.findFirst({
+      where: { token: rawToken },
+      include: { user: true },
+    })
+    if (!existingRefreshToken) {
+      return res.status(401).json({ message: "Refresh Token invalide" })
+    }
+
+    if (existingRefreshToken.expired_at < new Date()) {
+      await prisma.refreshToken.delete({
+        where: { id: existingRefreshToken.id },
+      })
+      return res.status(401).json({ message: "Refresh Token expiré" })
+    }
+
+    await generateAndSetTokens(res, existingRefreshToken.user)
+
+    res.status(200).json({ success: true })
+  }
+
   async softDeleteUser(req: JwtRequest, res: Response) {
     const userId = Number(req.params.userId)
 
@@ -172,11 +198,11 @@ async function replaceRefreshTokenInDatabase(refreshToken: Token, user: User) {
 }
 
 function setAccessTokenCookie(res: Response, accessToken: Token) {
-  // Maybe add sameSite: "strict"
   res.cookie("accessToken", accessToken.token, {
     httpOnly: true,
     maxAge: accessToken.expiresInMS,
     secure: config.server.secure,
+    sameSite: "lax",
   })
 }
 
@@ -185,6 +211,7 @@ function setRefreshTokenCookie(res: Response, refreshToken: Token) {
     httpOnly: true,
     maxAge: refreshToken.expiresInMS,
     secure: config.server.secure,
+    sameSite: "lax",
     path: "/api/auth/refresh",
   })
 }
