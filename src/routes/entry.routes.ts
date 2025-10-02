@@ -19,4 +19,9 @@ router.post(
   verifyToken({ ownerRequired: true }),
   cw((req, res) => entryController.postEntry(req, res))
 )
+router.post(
+  "/:entryId/vote",
+  verifyToken({ ownerRequired: true }),
+  cw((req, res) => entryController.toggleEntryVote(req, res))
+)
 export default router

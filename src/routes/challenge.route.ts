@@ -22,16 +22,19 @@ router.get(
   verifyToken({ ownerRequired: false }),
   cw((req, res) => challengeController.findAllWithPagination(req, res))
 )
-router.get(
-  "/:challengeId",
-  verifyToken({ ownerRequired: false }),
-  cw((req, res) => challengeController.findUniqueChallenge(req, res))
-)
+
 router.post(
   "/",
   verifyToken({ ownerRequired: true }),
   cw((req, res) => challengeController.createChallenge(req, res))
 )
+
+router.get(
+  "/:challengeId",
+  verifyToken({ ownerRequired: false }),
+  cw((req, res) => challengeController.findUniqueChallenge(req, res))
+)
+
 router.patch(
   "/:challengeId",
   verifyToken({ ownerRequired: true }),
