@@ -107,8 +107,8 @@ export default class AuthController extends BaseController<User, "user_id"> {
     })
   }
 
-  async logout(_: Request, res: Response) {
-    deleteAccessTokenCookie(res)
+  async logout(req: Request, res: Response) {
+    await deleteTokenAndCookies(req, res)
     res.sendStatus(204)
   }
 
@@ -175,7 +175,7 @@ export default class AuthController extends BaseController<User, "user_id"> {
       deleted_at: new Date(),
     })
 
-    deleteAccessTokenCookie(res)
+    await deleteTokenAndCookies(req, res)
 
     res.sendStatus(204)
   }
@@ -223,10 +223,22 @@ function setRefreshTokenCookie(res: Response, refreshToken: Token) {
   })
 }
 
-function deleteAccessTokenCookie(res: Response) {
-  res.cookie("accessToken", "", {
+async function deleteTokenAndCookies(req: Request, res: Response) {
+  const rawToken = req.cookies?.refreshToken
+  if (rawToken) {
+    await prisma.refreshToken.deleteMany({ where: { token: rawToken } })
+  }
+
+  res.clearCookie("accessToken", {
     httpOnly: true,
     secure: config.server.secure,
-    maxAge: 0,
+    sameSite: "lax",
+  })
+
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: config.server.secure,
+    sameSite: "lax",
+    path: "/api/auth/refresh",
   })
 }
