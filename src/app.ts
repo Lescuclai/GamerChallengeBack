@@ -5,6 +5,7 @@ import { helmetMiddlewre } from "./middlewares/helmetMiddleware.js"
 import { xssSanitizer } from "./middlewares/xssSanitizerMiddleware.js"
 import { config } from "../config.js"
 import { router } from "./router.js"
+import { loggerMiddleware } from "./middlewares/loggerMiddleware.js"
 
 export const app = express()
 
@@ -15,5 +16,6 @@ app.use(xssSanitizer)
 app.use(helmetMiddlewre)
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+app.use(loggerMiddleware)
 
 app.use("/api", router)

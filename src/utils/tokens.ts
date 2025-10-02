@@ -3,6 +3,7 @@ import { User } from "@prisma/client"
 import { config } from "../../config.js"
 import z from "zod"
 import { JwtPayload } from "../middlewares/authMiddleware.js"
+import { logger } from "../lib/log.js"
 const jwtPayloadSchema = z.object({
   id: z.number().int().min(1),
   role: z.string(),
@@ -51,10 +52,10 @@ export function decodeJwt(token: string): ValidatedJwtPayload | null {
     if (validationResult.success) {
       return validationResult.data
     }
-    console.log("Token payload invalide:", validationResult.error)
+    logger.error("Token payload invalide:", validationResult.error)
     return null
   } catch (error) {
-    console.log("Erreur décodage token:", error)
+    logger.error("Erreur décodage token:", error)
     return null
   }
 }

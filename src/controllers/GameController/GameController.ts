@@ -2,6 +2,7 @@ import { Game } from "@prisma/client"
 import { Request, Response } from "express"
 import { prisma } from "../../../prisma/index.js"
 import BaseController from "../BaseController.js"
+import { logger } from "../../lib/log.js"
 
 export default class GameController extends BaseController<Game, "game_id"> {
   constructor() {
@@ -26,7 +27,7 @@ export default class GameController extends BaseController<Game, "game_id"> {
 
       return res.status(200).json({ data: games })
     } catch (error) {
-      console.error("Erreur lors de la récupération des jeux :", error)
+      logger.error("Erreur lors de la récupération des jeux :", error)
       return res.status(500).json({ message: "Erreur serveur" })
     }
   }
