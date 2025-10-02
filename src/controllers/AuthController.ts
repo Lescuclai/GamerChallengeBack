@@ -36,10 +36,11 @@ export default class AuthController extends BaseController<User, "user_id"> {
       })
     }
 
-    await generateAndSetTokens(res, user)
+    const accessToken = await generateAndSetTokens(res, user)
 
     return res.status(200).json({
       message: "Connecté avec succès",
+      accessToken: accessToken,
       user: {
         id: user.user_id,
         pseudo: user.pseudo,
@@ -89,10 +90,11 @@ export default class AuthController extends BaseController<User, "user_id"> {
       avatar: avatar.trim(),
     })
 
-    await generateAndSetTokens(res, user)
+    const accessToken = await generateAndSetTokens(res, user)
 
     res.status(201).json({
       message: "Utilisateur créé avec succès",
+      accessToken: accessToken,
       user: {
         id: user.user_id,
         pseudo: user.pseudo,
@@ -148,9 +150,12 @@ export default class AuthController extends BaseController<User, "user_id"> {
       return res.status(401).json({ message: "Refresh Token expiré" })
     }
 
-    await generateAndSetTokens(res, existingRefreshToken.user)
+    const accessToken = await generateAndSetTokens(
+      res,
+      existingRefreshToken.user
+    )
 
-    res.status(200).json({ success: true })
+    res.status(200).json({ accessToken })
   }
 
   async softDeleteUser(req: JwtRequest, res: Response) {
@@ -183,6 +188,8 @@ async function generateAndSetTokens(res: Response, user: User) {
 
   setAccessTokenCookie(res, accessToken)
   setRefreshTokenCookie(res, refreshToken)
+
+  return accessToken
 }
 
 async function replaceRefreshTokenInDatabase(refreshToken: Token, user: User) {
