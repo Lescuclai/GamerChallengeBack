@@ -11,6 +11,7 @@ import { JwtRequest } from "../middlewares/authMiddleware.js"
 import { config } from "../../config.js"
 import argon2 from "argon2"
 import crypto from "node:crypto"
+import { sendEmailForgotPassword } from "../utils/emailSenderDev.js"
 
 interface Token {
   token: string
@@ -206,7 +207,10 @@ export default class AuthController extends BaseController<User, "user_id"> {
       },
     })
 
-    //TODO : Envoyer lien de réinitialisation
+    await sendEmailForgotPassword({
+      userEmail: user.email,
+      token: forgotPasswordToken,
+    })
 
     res.json({
       message: "Un lien de réinitialisation a été envoyé sur l'email renseigné",
@@ -214,7 +218,16 @@ export default class AuthController extends BaseController<User, "user_id"> {
   }
 
   async resetPassword(req: Request, res: Response) {
-    const { token, password } = req.body
+    const { token, password, confirm } = req.body
+
+    if (password !== confirm) {
+      return res
+        .status(400)
+        .json({ message: "Les mots de passe ne correspondent pas" })
+    }
+
+    console.log(req.body)
+
     const resetToken = await prisma.token.findUnique({ where: { token } })
 
     if (!resetToken || resetToken.expires_at < new Date()) {
@@ -231,7 +244,6 @@ export default class AuthController extends BaseController<User, "user_id"> {
     await prisma.token.delete({ where: { id: resetToken.id } })
 
     res.json({
-      password: password,
       message: "Mot de passe réinitialisé, vous pouvez vous connecter",
     })
   }
