@@ -5,8 +5,6 @@ import authRoutes from "./routes/auth.routes.js"
 import challengeRoutes from "./routes/challenge.route.js"
 import entryRoutes from "./routes/entry.routes.js"
 import gameRoutes from "./routes/game.routes.js"
-import swaggerJSDoc from "swagger-jsdoc"
-import swaggerUi from "swagger-ui-express"
 
 export const router = Router()
 
