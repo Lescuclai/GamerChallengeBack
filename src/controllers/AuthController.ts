@@ -185,7 +185,7 @@ export default class AuthController extends BaseController<User, "user_id"> {
   async forgotPassword(req: Request, res: Response) {
     const { email } = req.body
 
-    const user = prisma.user.findUnique({ where: { email } })
+    const user = await prisma.user.findUnique({ where: { email } })
     if (!user) {
       return res.status(200).json({
         message:
@@ -198,8 +198,10 @@ export default class AuthController extends BaseController<User, "user_id"> {
 
     await prisma.token.create({
       data: {
-        forgotPasswordToken,
+        token: forgotPasswordToken,
+        token_type: "forgot_pswd",
         user_id: user.user_id,
+        issued_at: new Date(),
         expires_at: expiresAt,
       },
     })
@@ -212,7 +214,26 @@ export default class AuthController extends BaseController<User, "user_id"> {
   }
 
   async resetPassword(req: Request, res: Response) {
-    //TODO : Faire le reset password
+    const { token, password } = req.body
+    const resetToken = await prisma.token.findUnique({ where: { token } })
+
+    if (!resetToken || resetToken.expires_at < new Date()) {
+      res.status(400).json({ message: "Token invalide ou expiré" })
+    }
+
+    const hashedPassword = await argon2.hash(password)
+
+    await prisma.user.update({
+      where: { user_id: resetToken.user_id },
+      data: { password: hashedPassword },
+    })
+
+    await prisma.token.delete({ where: { id: resetToken.id } })
+
+    res.json({
+      password: password,
+      message: "Mot de passe réinitialisé, vous pouvez vous connecter",
+    })
   }
 }
 
@@ -237,7 +258,7 @@ async function replaceRefreshTokenInDatabase(refreshToken: Token, user: User) {
       user_id: user.user_id,
       token_type: "refresh",
       issued_at: new Date(),
-      expired_at: new Date(new Date().valueOf() + refreshToken.expiresInMS),
+      expires_at: new Date(new Date().valueOf() + refreshToken.expiresInMS),
     },
   })
 }
