@@ -15,9 +15,11 @@ export interface JwtRequest extends Request {
   user?: JwtPayload | null
 }
 interface VerifyTokenOptions {
-  ownerRequired?: boolean
+  validityRequired?: boolean
 }
-export const verifyToken = ({ ownerRequired = true }: VerifyTokenOptions) => {
+export const verifyToken = ({
+  validityRequired = true,
+}: VerifyTokenOptions) => {
   return (req: JwtRequest, res: Response, next: NextFunction) => {
     const accessToken = req.cookies?.accessToken
     let decoded: JwtPayload | null = null
@@ -25,14 +27,14 @@ export const verifyToken = ({ ownerRequired = true }: VerifyTokenOptions) => {
       try {
         decoded = jwt.verify(accessToken, getJwtSecret()) as JwtPayload
       } catch {
-        if (ownerRequired) {
+        if (validityRequired) {
           return res.status(401).json({ message: "Token invalide ou expiré" })
         }
         decoded = null
       }
     }
     req.user = decoded && decoded.id ? decoded : null
-    if (ownerRequired) {
+    if (validityRequired) {
       if (!req.user) {
         return res.status(401).json({ message: "Utilisateur non authentifié" })
       }

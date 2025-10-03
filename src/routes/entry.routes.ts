@@ -11,17 +11,17 @@ router.get(
 )
 router.get(
   "/:challengeId",
-  verifyToken({ ownerRequired: false }),
+  verifyToken({ validityRequired: false }),
   cw((req, res) => entryController.findAllEntries(req, res))
 )
 router.post(
   "/:challengeId",
-  verifyToken({ ownerRequired: true }),
+  verifyToken({ validityRequired: true }),
   cw((req, res) => entryController.postEntry(req, res))
 )
 router.post(
   "/:entryId/vote",
-  verifyToken({ ownerRequired: true }),
+  verifyToken({ validityRequired: true }),
   cw((req, res) => entryController.toggleEntryVote(req, res))
 )
 export default router

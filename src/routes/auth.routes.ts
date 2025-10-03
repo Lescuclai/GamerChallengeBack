@@ -23,13 +23,15 @@ router.post(
 
 router.get(
   "/me",
-  verifyToken({ ownerRequired: true }),
+  verifyToken({ validityRequired: true }),
   cw((req, res) => authController.me(req, res))
 )
 
+router.post("/refresh", authController.refreshAccessToken)
+
 router.patch(
   "/delete/:userId",
-  verifyToken({ ownerRequired: true }),
+  verifyToken({ validityRequired: true }),
   cw((req, res) => authController.softDeleteUser(req, res))
 )
 
