@@ -16,7 +16,6 @@ externalDocs:
   url: https://swagger.io
 servers:
   - url: http://localhost:5000/api/
-
 tags:
   - name: auth
     description: Authentication & user access
@@ -26,7 +25,6 @@ tags:
     description: Disconnect from application
   - name: challenges
     description: Create and manage gaming challenges
-
 paths:
   /auth/register:
     post:
@@ -52,7 +50,6 @@ paths:
           description: Passwords do not match
         "409":
           description: Email already in use
-
   /auth/login:
     post:
       tags:
@@ -75,7 +72,6 @@ paths:
                 $ref: "#/components/schemas/LoginResponse"
         "401":
           description: Invalid credentials
-
   /auth/logout:
     post:
       tags:
@@ -86,7 +82,6 @@ paths:
       responses:
         "204":
           description: Successfully logged out
-
   /auth/me:
     get:
       tags:
@@ -105,7 +100,6 @@ paths:
                 $ref: "#/components/schemas/User"
         "404":
           description: User not found
-
   /auth/delete/{userId}:
     patch:
       tags:
@@ -126,7 +120,6 @@ paths:
           description: User soft-deleted
         "403":
           description: Forbidden - user not authorized
-
   /games:
     get:
       tags:
@@ -148,7 +141,6 @@ paths:
                       $ref: "#/components/schemas/Game"
         "500":
           description: Server error
-
   /challenges:
     post:
       tags:
@@ -189,14 +181,80 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-
+  /entries/{entryId}:
+    patch:
+      tags:
+        - challenges
+      summary: Update an entry
+      description: Update the details of a specific entry by its ID.
+      operationId: updateEntry
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Updated entry data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntryUpdateRequest"
+      responses:
+        "200":
+          description: Entry updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntryResponse"
+        "400":
+          description: Invalid input data
+        "403":
+          description: Unauthorized to update this entry
+        "404":
+          description: Entry not found
+        "500":
+          description: Server error
+    delete:
+      tags:
+        - challenges
+      summary: Delete an entry
+      description: Delete a specific entry by its ID.
+      operationId: deleteEntry
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Entry deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Entry deleted"
+        "403":
+          description: Unauthorized to delete this entry
+        "404":
+          description: Entry not found
+        "500":
+          description: Server error
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   schemas:
     RegisterRequest:
       type: object
@@ -217,7 +275,6 @@ components:
         confirm:
           type: string
           format: password
-
     RegisterResponse:
       type: object
       properties:
@@ -225,7 +282,6 @@ components:
           type: string
         user:
           $ref: "#/components/schemas/User"
-
     LoginRequest:
       type: object
       required:
@@ -238,7 +294,6 @@ components:
         password:
           type: string
           format: password
-
     LoginResponse:
       type: object
       properties:
@@ -246,7 +301,6 @@ components:
           type: string
         user:
           $ref: "#/components/schemas/User"
-
     User:
       type: object
       properties:
@@ -262,7 +316,6 @@ components:
         updated_at:
           type: string
           format: date-time
-
     Game:
       type: object
       properties:
@@ -276,7 +329,6 @@ components:
           type: string
           format: uri
           example: "https://www.example.com/lol.jpg"
-
     ChallengeCreateRequest:
       type: object
       required:
@@ -309,7 +361,6 @@ components:
           type: integer
           description: ID of the user creating the challenge
           example: 1
-
     ChallengeCreateResponse:
       type: object
       properties:
@@ -343,7 +394,6 @@ components:
             updated_at:
               type: string
               format: date-time
-
     ValidationError:
       type: object
       properties:
@@ -366,7 +416,6 @@ components:
               message:
                 type: string
                 example: "Le titre doit contenir au moins 3 caractères"
-
     ErrorResponse:
       type: object
       properties:
@@ -376,3 +425,31 @@ components:
         details:
           type: string
           example: "Database connection failed"
+    EntryUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        video_url:
+          type: string
+          format: uri
+    EntryResponse:
+      type: object
+      properties:
+        entry_id:
+          type: integer
+        title:
+          type: string
+        video_url:
+          type: string
+          format: uri
+        user_id:
+          type: integer
+        challenge_id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time

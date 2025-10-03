@@ -1,17 +1,13 @@
 import { Router } from "express"
-// import path from "node:path"
-// import { dirname } from "path"
-// import swaggerJSDoc from "swagger-jsdoc"
-// import swaggerUi from "swagger-ui-express"
-// import { fileURLToPath } from "url"
+import swaggerJSDoc from "swagger-jsdoc"
+import swaggerUi from "swagger-ui-express"
 import authRoutes from "./routes/auth.routes.js"
 import challengeRoutes from "./routes/challenge.route.js"
 import entryRoutes from "./routes/entry.routes.js"
 import gameRoutes from "./routes/game.routes.js"
-import swaggerJSDoc from "swagger-jsdoc"
-import swaggerUi from "swagger-ui-express"
 
 export const router = Router()
+
 //Routes
 router.use("/auth", authRoutes)
 router.use("/challenges", challengeRoutes)
