@@ -185,6 +185,8 @@ export default class EntryController extends BaseController<Entry, "entry_id"> {
     }
     await this.delete(entryToDelete.entry_id)
     res.status(200).json({ message: entryToDelete })
+  }
+
   async toggleEntryVote(req: JwtRequest, res: Response) {
     const entryId = parseInt(req.params.entryId)
     const userId = req.user!.id
