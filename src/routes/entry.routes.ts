@@ -3,8 +3,6 @@ import EntryController from "../controllers/EntryController/EntryController.js"
 import { verifyToken } from "../middlewares/authMiddleware.js"
 import { controllerWrapper as cw } from "../utils/controllerWrapper.js"
 
-
-
 const router = Router()
 const entryController = new EntryController()
 
@@ -14,12 +12,19 @@ router.get(
 )
 router.get(
   "/:challengeId",
+  verifyToken({ validityRequired: false }),
   cw((req, res) => entryController.findAllEntries(req, res))
 )
 router.post(
   "/:challengeId",
-  verifyToken({ ownerRequired: true }),
+  verifyToken({ validityRequired: true }),
   cw((req, res) => entryController.postEntry(req, res))
+)
+
+router.post(
+  "/:entryId/vote",
+  verifyToken({ validityRequired: true }),
+  cw((req, res) => entryController.toggleEntryVote(req, res))
 )
 
 router.patch(
@@ -33,5 +38,6 @@ router.delete(
   verifyToken({ ownerRequired: true }),
   cw((req, res) => entryController.deleteEntry(req, res))
 )
+
 
 export default router

@@ -72,7 +72,17 @@ export default class EntryController extends BaseController<Entry, "entry_id"> {
           where: {
             AND: [{ challenge_id: Number(challengeId) }, { user_id: userId }],
           },
-          include: { user: true },
+          include: {
+            user: {
+              select: {
+                pseudo: true,
+                avatar: true,
+              },
+            },
+            entryVoters: {
+              where: { user_id: userId },
+            },
+          },
           orderBy: {
             created_at: "desc",
           },
@@ -84,13 +94,36 @@ export default class EntryController extends BaseController<Entry, "entry_id"> {
               { user_id: { not: userId } },
             ],
           },
-          include: { user: true },
+          include: {
+            user: {
+              select: {
+                pseudo: true,
+                avatar: true,
+              },
+            },
+            entryVoters: {
+              where: { user_id: userId },
+            },
+          },
           orderBy: {
             created_at: "desc",
           },
         }),
       ])
-      return res.status(200).json({ memberEntries, entries })
+      const memberEntriesWithVote = memberEntries.map(
+        ({ entryVoters, ...entry }) => ({
+          ...entry,
+          userHasVoted: entryVoters.length > 0,
+        })
+      )
+      const entriesWithVote = entries.map(({ entryVoters, ...entry }) => ({
+        ...entry,
+        userHasVoted: entryVoters.length > 0,
+      }))
+      return res.status(200).json({
+        memberEntries: memberEntriesWithVote,
+        entries: entriesWithVote,
+      })
     }
   }
 
@@ -152,5 +185,32 @@ export default class EntryController extends BaseController<Entry, "entry_id"> {
     }
     await this.delete(entryToDelete.entry_id)
     res.status(200).json({ message: entryToDelete })
+  async toggleEntryVote(req: JwtRequest, res: Response) {
+    const entryId = parseInt(req.params.entryId)
+    const userId = req.user!.id
+    const entry = await this.findById(entryId)
+    if (!entry) {
+      return res
+        .status(404)
+        .json({ error: `Aucune participation trouvée avec l'id : ${entryId}` })
+    }
+    const alreadyVoted = await prisma.voteUserEntry.findUnique({
+      where: {
+        user_id_entry_id: { user_id: userId, entry_id: entryId },
+      },
+    })
+    if (alreadyVoted) {
+      await prisma.voteUserEntry.delete({
+        where: {
+          user_id_entry_id: { user_id: userId, entry_id: entryId },
+        },
+      })
+      return res.status(200).json({ voted: false })
+    } else {
+      await prisma.voteUserEntry.create({
+        data: { user_id: userId, entry_id: entryId },
+      })
+      return res.status(201).json({ voted: true })
+    }
   }
 }

@@ -1,10 +1,11 @@
 import { Challenge } from "@prisma/client"
 import { Request, Response } from "express"
 import z from "zod"
-import { prisma } from "../../../prisma/index.js"
 import { JwtRequest } from "../../middlewares/authMiddleware.js"
+import { prisma } from "../../../prisma/index.js"
 import { challengeSchema } from "../../schemas/challenge.schema.js"
 import BaseController from "../BaseController.js"
+import { logger } from "../../lib/log.js"
 
 export default class ChallengeController extends BaseController<
   Challenge,
@@ -137,6 +138,7 @@ export default class ChallengeController extends BaseController<
         },
         user: {
           select: {
+            user_id: true,
             pseudo: true,
             avatar: true,
           },
@@ -158,7 +160,15 @@ export default class ChallengeController extends BaseController<
       })
       userHasVoted = !!findVote
     }
-    return res.status(200).json({ ...challenge, userHasVoted })
+    return res.status(200).json({
+      ...challenge,
+      user: {
+        id: challenge.user.user_id,
+        pseudo: challenge.user.pseudo,
+        avatar: challenge.user.avatar,
+      },
+      userHasVoted,
+    })
   }
 
   //Challenge
@@ -193,7 +203,7 @@ export default class ChallengeController extends BaseController<
         challenge: newChallenge,
       })
     } catch (err: unknown) {
-      console.error(err)
+      logger.error(err)
       return res.status(500).json({
         error: "Erreur serveur",
         details: err instanceof Error ? err.message : "Erreur inconnue",
