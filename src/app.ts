@@ -9,7 +9,7 @@ import { loggerMiddleware } from "./middlewares/loggerMiddleware.js"
 import { limiter } from "./middlewares/rateLimitMiddleware.js"
 
 export const app = express()
-app.use(limiter)
+// app.use(limiter) INFO : Source de bugs pour la presentation
 app.use(cors({ origin: config.server.allowedOrigins, credentials: true }))
 app.use(cookieParser())
 app.disable("x-powered-by")
