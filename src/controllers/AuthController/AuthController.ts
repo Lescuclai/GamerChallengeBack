@@ -1,14 +1,14 @@
-import BaseController from "./BaseController.js"
+import BaseController from "../BaseController.js"
 import type { Request, Response } from "express"
-import { prisma } from "../../prisma/index.js"
+import { prisma } from "../../../prisma/index.js"
 import { User } from "@prisma/client"
-import { registerSchema, loginSchema } from "../schemas/auth.schema.js"
+import { registerSchema, loginSchema } from "../../schemas/auth.schema.js"
 import {
   generateAccessTokenOnly,
   generateAuthenticationTokens,
-} from "../utils/tokens.js"
-import { JwtRequest } from "../middlewares/authMiddleware.js"
-import { config } from "../../config.js"
+} from "../../utils/tokens.js"
+import { JwtRequest } from "../../middlewares/authMiddleware.js"
+import { config } from "../../../config.js"
 import argon2 from "argon2"
 
 interface Token {

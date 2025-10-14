@@ -1,5 +1,5 @@
 import { config } from "./config.js"
-import { app } from "./src/app.js"
+import  app  from "./src/app.js"
 import { logger } from "./src/lib/log.js"
 
 const port = config.server.port
