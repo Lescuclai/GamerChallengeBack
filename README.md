@@ -18,3 +18,9 @@ docker network ls
 
 And inspect more closely with:
 docker inspect network <name>
+
+To run tests separatly from the real database, we had to create a new specific Docker container (gamer-challenges-db-test) with a specific associate volume (db_data_test) and env variables, but also a specific prisma client and schema.
+
+Before running the tests you need to run :
+ npm run db:generate:test
+ npm run db:migrate:test
