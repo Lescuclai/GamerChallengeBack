@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { controllerWrapper as cw } from "../utils/controllerWrapper.js"
-import AuthController from "../controllers/AuthController.js"
+import AuthController from "../controllers/AuthController/AuthController.js"
 import { verifyToken } from "../middlewares/authMiddleware.js"
 
 const router = Router()
@@ -23,13 +23,15 @@ router.post(
 
 router.get(
   "/me",
-  verifyToken,
+  verifyToken({ validityRequired: true }),
   cw((req, res) => authController.me(req, res))
 )
 
+router.post("/refresh", authController.refreshAccessToken)
+
 router.patch(
   "/delete/:userId",
-  verifyToken,
+  verifyToken({ validityRequired: true }),
   cw((req, res) => authController.softDeleteUser(req, res))
 )
 

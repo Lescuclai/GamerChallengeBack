@@ -1,0 +1,26 @@
+As we have separate repositories but we want to use docker on both of them we need to follow some steps
+
+Create a network between two separate repository in order to permit communication between them :
+docker network create <name>
+After that you need to have in each docker-compose.yml the following lines of code à the end of the file
+
+networks:
+  <name>:
+    external: true
+
+And 
+networks:
+  - <name>
+As last lines of each services
+
+You can check if the network exist with:
+docker network ls
+
+And inspect more closely with:
+docker inspect network <name>
+
+To run tests separatly from the real database, we had to create a new specific Docker container (gamer-challenges-db-test) with a specific associate volume (db_data_test) and env variables, but also a specific prisma client and schema.
+
+Before running the tests you need to run :
+ npm run db:generate:test
+ npm run db:migrate:test
