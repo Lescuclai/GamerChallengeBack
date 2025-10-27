@@ -6,10 +6,9 @@ import { xssSanitizer } from "./middlewares/xssSanitizerMiddleware.js"
 import { config } from "../config.js"
 import { router } from "./router.js"
 import { loggerMiddleware } from "./middlewares/loggerMiddleware.js"
-// import { limiter } from "./middlewares/rateLimitMiddleware.js"
+
 
 const app = express()
-// app.use(limiter) INFO : Source de bugs pour la presentation
 app.use(cors({ origin: config.server.allowedOrigins, credentials: true }))
 app.use(cookieParser())
 app.disable("x-powered-by")
