@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsc -p tsconfig.prod.json",
+    "build":  "npm ci && npx prisma generate && npx prisma migrate deploy && npx tsx prisma/seeding.ts && tsc -p tsconfig.prod.json",
     "======= Pour le dev ========": "========================",
     "dev": "tsx watch --env-file=.env index.ts",
     "test": "cross-env NODE_ENV=TEST NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test -- jest --detectOpenHandles",
