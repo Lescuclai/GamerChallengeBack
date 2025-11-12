@@ -1,0 +1,57 @@
+name: Run API Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  run_api_tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: gamer
+          POSTGRES_PASSWORD: gamer
+          POSTGRES_DB: gamer_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U gamer"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://gamer:gamer@localhost:5432/gamer_test
+      NODE_ENV: TEST
+      JWT_SECRET: testsecret
+      TOKEN_EXPIRES_IN: 1h
+
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client (test schema)
+        run: npx prisma generate --schema=prisma/schema.test.prisma
+
+      - name: Apply migrations
+        run: npx prisma migrate deploy --schema=prisma/schema.test.prisma
+
+      - name: Seed database
+        run: npx tsx prisma/seeding.ts
+
+      - name: Run tests
+        run: npm run test

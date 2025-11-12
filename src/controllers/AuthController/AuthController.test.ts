@@ -7,7 +7,11 @@ const prisma = new PrismaClient()
 
 describe("AuthController Integration", () => {
   beforeAll(async () => {
-    // Nettoie la base avant les tests
+    // Nettoie la base avant les tests (respecter l'ordre des contraintes FK)
+    await prisma.voteUserEntry.deleteMany()
+    await prisma.voteUserChallenge.deleteMany()
+    await prisma.entry.deleteMany()
+    await prisma.challenge.deleteMany()
     await prisma.refreshToken.deleteMany()
     await prisma.user.deleteMany()
   })

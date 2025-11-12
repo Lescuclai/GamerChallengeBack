@@ -85,3 +85,7 @@
 {"level":"error","message":"IP bloquée: ::ffff:172.18.0.1","timestamp":"2025-10-05 09:18:34"}
 {"level":"error","message":"IP bloquée: ::ffff:172.18.0.1","timestamp":"2025-10-05 09:18:34"}
 {"level":"error","message":"IP bloquée: ::ffff:172.18.0.1","timestamp":"2025-10-05 09:18:34"}
+{"content_length":"78","ip":"::ffff:127.0.0.1","level":"warn","message":"HTTP Request","method":"POST","response_time":11.808,"status_code":409,"timestamp":"2025-11-12 11:58:44","url":"/api/auth/register"}
+{"content_length":"56","ip":"::ffff:127.0.0.1","level":"warn","message":"HTTP Request","method":"POST","response_time":171.09,"status_code":401,"timestamp":"2025-11-12 11:58:45","url":"/api/auth/login"}
+{"content_length":"78","ip":"::ffff:127.0.0.1","level":"warn","message":"HTTP Request","method":"POST","response_time":64.695,"status_code":409,"timestamp":"2025-11-12 11:59:41","url":"/api/auth/register"}
+{"content_length":"56","ip":"::ffff:127.0.0.1","level":"warn","message":"HTTP Request","method":"POST","response_time":199.078,"status_code":401,"timestamp":"2025-11-12 11:59:41","url":"/api/auth/login"}
