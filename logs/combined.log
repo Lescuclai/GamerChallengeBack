@@ -89,3 +89,5 @@
 {"content_length":"56","ip":"::ffff:127.0.0.1","level":"warn","message":"HTTP Request","method":"POST","response_time":171.09,"status_code":401,"timestamp":"2025-11-12 11:58:45","url":"/api/auth/login"}
 {"content_length":"78","ip":"::ffff:127.0.0.1","level":"warn","message":"HTTP Request","method":"POST","response_time":64.695,"status_code":409,"timestamp":"2025-11-12 11:59:41","url":"/api/auth/register"}
 {"content_length":"56","ip":"::ffff:127.0.0.1","level":"warn","message":"HTTP Request","method":"POST","response_time":199.078,"status_code":401,"timestamp":"2025-11-12 11:59:41","url":"/api/auth/login"}
+{"content_length":"78","ip":"::ffff:127.0.0.1","level":"warn","message":"HTTP Request","method":"POST","response_time":20.898,"status_code":409,"timestamp":"2025-11-12 12:11:38","url":"/api/auth/register"}
+{"content_length":"56","ip":"::ffff:127.0.0.1","level":"warn","message":"HTTP Request","method":"POST","response_time":114.988,"status_code":401,"timestamp":"2025-11-12 12:11:39","url":"/api/auth/login"}
