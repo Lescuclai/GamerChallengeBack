@@ -1,4 +1,6 @@
 {
+  //Ce fichier est utilisé pour la compilation TypeScript en production, à des fins de build nécessaire au déploiement Render.
+  // Les commandes de build et de start dans package.json s'y réfèrent.
   "compilerOptions": {
     "target": "ES2017",
     "module": "ESNext",
@@ -10,11 +12,6 @@
     "skipLibCheck": true,
     "isolatedModules": true
   },
-  "include": ["src", "prisma", "index.ts"],  
-  "exclude": [
-  "node_modules",
-  "**/*.test.ts",
-  "**/*.spec.ts",
-  "jest.config.ts"
-]
+  "include": ["src", "prisma", "index.ts"],
+  "exclude": ["node_modules", "**/*.test.ts", "**/*.spec.ts", "jest.config.ts"]
 }

@@ -7,9 +7,13 @@ import { config } from "../config.js"
 import { router } from "./router.js"
 import { loggerMiddleware } from "./middlewares/loggerMiddleware.js"
 
-
 const app = express()
-app.use(cors({ origin: config.server.allowedOrigins, credentials: true }))
+app.use(
+  cors({
+    origin: config.server.allowedOrigins as string | string[],
+    credentials: true,
+  })
+)
 app.use(cookieParser())
 app.disable("x-powered-by")
 app.use(xssSanitizer)
@@ -20,4 +24,4 @@ app.use(loggerMiddleware)
 
 app.use("/api", router)
 
-export default app;
+export default app

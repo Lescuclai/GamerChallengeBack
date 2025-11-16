@@ -16,6 +16,7 @@ services:
       retries: 5
     networks:
       - gamerchallenge-network
+      # Référence au réseau Docker externe
 
   gamer-challenges-db-test:
     image: postgres:latest
@@ -27,8 +28,10 @@ services:
       - db_data_test:/var/lib/postgresql
     ports:
       - "6000:5432"
+      # Expose le port 6000 pour les tests puisque le port 5432 est déjà utilisé par la base de données principale
     networks:
       - gamerchallenge-network
+      # Référence au réseau Docker externe
       
   gamer-challenges-api:
     image: node:22
@@ -53,6 +56,7 @@ services:
     restart: unless-stopped
     networks:
       - gamerchallenge-network
+      # Référence au réseau Docker externe
 
   gamer-challenges-adminer:
     image: adminer:latest
@@ -65,10 +69,22 @@ services:
         condition: service_healthy
     networks:
       - gamerchallenge-network
+      # Référence au réseau Docker externe
 
 networks:
   gamerchallenge-network:
     external: true
+# Si front et back tournent dans Docker, mais dans des projets différents,
+# alors on doit créer un réseau Docker partagé entre les deux projets et y connecter les conteneurs.
+# Pour créer un réseau Docker externe, on peut utiliser la commande suivante :
+# docker network create <nom_du_reseau>
+# Il faudra le créer une seule fois avant de lancer les conteneurs des deux projets.
+# Pour vérifier les réseaux existants : docker network ls
+# Pour vérifier quels sont les conteneurs connectés : docker network inspect <nom_du_reseau>
+# Pour connecter un conteneur à un réseau existant : docker network connect <nom_du_reseau> <nom_du_conteneur>
+# Supprimer un réseau : docker network rm <nom_du_reseau>
+# il faudra avant de le supprimer, supprimer tous les conteneurs qui y sont connectés et leurs volumes associés, avec la commande :
+# docker-compose down -v
 
 volumes:
   db_data:

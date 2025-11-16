@@ -12,7 +12,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
     "docker:up": "docker compose up -d --build",
-    "docker:start:dev": "npm i && npx prisma generate && npx prisma migrate dev --name init && npm run dev",
+    "docker:start:dev": "npm i && npx prisma generate && npm run db:migrate:dev && npm run dev",
     "db:generate:test": "dotenv -e .env.test -- npx prisma generate --schema=prisma/schema.test.prisma",
     "db:seed": "docker compose exec gamer-challenges-api npx tsx --env-file=.env prisma/seeding.ts",
     "db:migrate:test":"dotenv -e .env.test -- npx prisma migrate dev --name init --schema=prisma/schema.test.prisma",
